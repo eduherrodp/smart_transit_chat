@@ -23,7 +23,7 @@ A service account key is needed to access the Cloud Firestore API. To create a s
 
 ##### Option 1: Create a service account key using the [algorithm](https://cloud.google.com/iam/docs/keys-create-delete#iam-service-account-keys-delete-go) provided by Google and modified by us.
 
-1. Create a directory called **_private_** in ```gcloud``` path.
+1. Create a directory called **_private_** in ```gcloud``` path. Put the JSON downloaded there.
 2. Execute the following command to create the service account key:
 
 ```bash 
