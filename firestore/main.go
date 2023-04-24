@@ -9,7 +9,8 @@ import (
 )
 
 type Config struct {
-	ProjectID string `json:"project_id"`
+	// ProjectID is the ID of the project to run the sample
+	ProjectID string `mapstructure:"project_id"`
 }
 
 // Code based on the documentation: https://github.com/spf13/viper
@@ -27,6 +28,7 @@ func getProjectID() string {
 	if err := viper.Unmarshal(&config); err != nil {
 		log.Fatalf("Unable to decode into struct, %v", err)
 	}
+
 	log.Printf("ProjectID: %s", config.ProjectID)
 	return config.ProjectID
 }
@@ -43,7 +45,7 @@ func createClient(ctx context.Context, projectID string) (*firestore.Client, err
 // Principal function
 func main() {
 	// Get projectID from config file
-	projectID := "sanguine-tome-381917"
+	projectID := getProjectID()
 
 	// Get a Firestore client
 	ctx := context.Background()
