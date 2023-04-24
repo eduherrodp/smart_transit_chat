@@ -1,3 +1,19 @@
+/*
+ * @copyright Copyright (C) 2023 José Eduardo Hernández Rodríguez
+ * @license MIT License
+ * All rights reserved.
+ * This source code is licensed under the MIT License found in the
+ * LICENSE file in the root directory of this source tree
+ *
+ * Author: José Eduardo Hernández Rodríguez
+ * Email: eduher.rodp@gmail.com
+ * Date: April 23, 2023
+ *
+ * Description: This file contains the implementation of a factory for creating
+ * Firestore clients. along with a main function that retrieves documents from
+ * the "log" collection using the singleton instance of firestore.Client.
+ */
+
 package main
 
 import (
@@ -11,17 +27,21 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config represents the configuration struct that is used
+// to store configuration values from the YAML config file
 type Config struct {
 	// ProjectID is the ID of the project to run the sample
 	ProjectID string `mapstructure:"project_id"`
 }
 
+// This is a singleton instance of firestore.Client
 var (
 	client *firestore.Client
 	once   sync.Once
 )
 
-// GetProjectID gets the project ID from the config file
+// GetProjectID reads the configuration values from the YAML
+// config file and returns the project ID
 func GetProjectID() string {
 	// Load configuration from file
 	viper.SetConfigName("config")
@@ -41,7 +61,8 @@ func GetProjectID() string {
 	return config.ProjectID
 }
 
-// CreateClient creates a Firestore client
+// CreateClient creates a Firestore client using the provided
+// project ID and returns the client
 func CreateClient(ctx context.Context, projectID string) (*firestore.Client, error) {
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
@@ -56,6 +77,7 @@ type FirestoreClientFactory struct {
 }
 
 // GetClient returns a singleton instance of firestore.Client
+// by creating the client if it doesn't exist
 func (f *FirestoreClientFactory) GetClient() (*firestore.Client, error) {
 	var err error
 
@@ -74,6 +96,8 @@ func (f *FirestoreClientFactory) GetClient() (*firestore.Client, error) {
 	return client, err
 }
 
+// main function that creates a factory for Firestore clients
+// and retrieves documents from the "log" collection
 func main() {
 	// Create a factory for Firestore clients
 	factory := FirestoreClientFactory{}
