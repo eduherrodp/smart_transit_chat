@@ -50,11 +50,16 @@ func CreateClient(ctx context.Context, projectID string) (*firestore.Client, err
 	return client, nil
 }
 
-// GetFirestoreClient returns a singleton instance of firestore.Client
-func GetFirestoreClient() (*firestore.Client, error) {
+// FirestoreClientFactory is a factory for creating Firestore clients
+type FirestoreClientFactory struct {
+	once sync.Once
+}
+
+// GetClient returns a singleton instance of firestore.Client
+func (f *FirestoreClientFactory) GetClient() (*firestore.Client, error) {
 	var err error
 
-	once.Do(func() {
+	f.once.Do(func() {
 		// Get project ID from config file
 		projectID := GetProjectID()
 
@@ -70,8 +75,11 @@ func GetFirestoreClient() (*firestore.Client, error) {
 }
 
 func main() {
+	// Create a factory for Firestore clients
+	factory := FirestoreClientFactory{}
+
 	// Get a Firestore client
-	firestoreClient, err := GetFirestoreClient()
+	firestoreClient, err := factory.GetClient()
 	if err != nil {
 		log.Fatalf("Failed to get Firestore client: %v", err)
 	}
