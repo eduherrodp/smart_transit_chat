@@ -19,9 +19,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"google.golang.org/api/iterator"
 	"log"
 	"sync"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	"github.com/spf13/viper"
@@ -37,7 +37,7 @@ type Config struct {
 // This is a singleton instance of firestore.Client
 var (
 	client *firestore.Client
-	once   sync.Once
+	_      sync.Once
 )
 
 // GetProjectID reads the configuration values from the YAML
@@ -80,7 +80,6 @@ type FirestoreClientFactory struct {
 // by creating the client if it doesn't exist
 func (f *FirestoreClientFactory) GetClient() (*firestore.Client, error) {
 	var err error
-
 	f.once.Do(func() {
 		// Get project ID from config file
 		projectID := GetProjectID()
@@ -96,26 +95,128 @@ func (f *FirestoreClientFactory) GetClient() (*firestore.Client, error) {
 	return client, err
 }
 
-// main function that creates a factory for Firestore clients
-// and retrieves documents from the "log" collection
-func main() {
-	// Create a factory for Firestore clients
-	factory := FirestoreClientFactory{}
+// Log Define a struct to represent a log document
+type Log struct {
+	ID        int64     `firestore:"id,omitempty"`
+	Input     string    `firestore:"input,omitempty"`
+	Output    string    `firestore:"output,omitempty"`
+	Timestamp time.Time `firestore:"timestamp,omitempty"`
+	UserID    string    `firestore:"user_id,omitempty"`
+}
 
-	// Get a Firestore client
-	firestoreClient, err := factory.GetClient()
+// CreateDocument creates a new document in the "log" collection with the given data
+func (f *FirestoreClientFactory) CreateDocument(ctx context.Context, data Log) (*firestore.DocumentRef, error) {
+	client, err := f.GetClient()
 	if err != nil {
-		log.Fatalf("Failed to get Firestore client: %v", err)
+		return nil, err
 	}
-	iter := firestoreClient.Collection("log").Documents(context.Background())
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Fatalf("Failed to iterate: %v", err)
-		}
-		fmt.Println(doc.Data())
+
+	docRef, _, err := client.Collection("log").Add(ctx, data)
+	if err != nil {
+		return nil, err
 	}
+
+	return docRef, nil
+}
+
+// GetDocument retrieves a document with the given ID from the "log" collection
+func (f *FirestoreClientFactory) GetDocument(ctx context.Context, id int64) (*Log, error) {
+	client, err := f.GetClient()
+	if err != nil {
+		return nil, err
+	}
+
+	docRef := client.Collection("log").Doc(fmt.Sprintf("%d", id))
+	doc, err := docRef.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var logData Log
+	if err := doc.DataTo(&logData); err != nil {
+		return nil, err
+	}
+
+	return &logData, nil
+}
+
+// UpdateDocument updates a document with the given ID in the "log" collection with the given data
+func (f *FirestoreClientFactory) UpdateDocument(ctx context.Context, id int64, data Log) error {
+	client, err := f.GetClient()
+	if err != nil {
+		return err
+	}
+
+	docRef := client.Collection("log").Doc(fmt.Sprintf("%d", id))
+	_, err = docRef.Set(ctx, data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteDocument deletes a document with the given ID from the "log" collection
+func (f *FirestoreClientFactory) DeleteDocument(ctx context.Context, id int64) error {
+	client, err := f.GetClient()
+	if err != nil {
+		return err
+	}
+
+	docRef := client.Collection("log").Doc(fmt.Sprintf("%d", id))
+	_, err = docRef.Delete(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func main() {
+	// Create an instance of the FirestoreClientFactory
+	factory := FirestoreClientFactory{}
+	// Create a new log document
+	newLog := Log{
+		Input:     "example input",
+		Output:    "example output",
+		Timestamp: time.Now(),
+		UserID:    "example_user",
+	}
+
+	// Create a context with a timeout of 5 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Create the document in Firestore
+	docRef, err := factory.CreateDocument(ctx, newLog)
+	if err != nil {
+		log.Fatalf("Failed to create document: %v", err)
+	}
+
+	log.Printf("Created document with ID: %s", docRef.ID)
+
+	// Retrieve the document from Firestore
+	retrievedLog, err := factory.GetDocument(ctx, newLog.ID)
+	if err != nil {
+		log.Fatalf("Failed to retrieve document: %v", err)
+	}
+
+	log.Printf("Retrieved document with ID %d: %+v", retrievedLog.ID, retrievedLog)
+
+	// Update the document in Firestore
+	retrievedLog.Output = "updated output"
+	err = factory.UpdateDocument(ctx, retrievedLog.ID, *retrievedLog)
+	if err != nil {
+		log.Fatalf("Failed to update document: %v", err)
+	}
+
+	log.Printf("Updated document with ID %d", retrievedLog.ID)
+
+	//// Delete the document from Firestore
+	//err = factory.DeleteDocument(ctx, retrievedLog.ID)
+	//if err != nil {
+	//	log.Fatalf("Failed to delete document: %v", err)
+	//}
+	//
+	//log.Printf("Deleted document with ID %d", retrievedLog.ID)
 }
