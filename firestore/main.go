@@ -37,7 +37,8 @@ type Config struct {
 // This is a singleton instance of firestore.Client
 var (
 	client *firestore.Client
-	_      sync.Once
+	// TODO: Apply the singleton pattern to the FirestoreClientFactory
+	_ sync.Once
 )
 
 // GetProjectID reads the configuration values from the YAML
@@ -120,21 +121,21 @@ func (f *FirestoreClientFactory) CreateDocument(ctx context.Context, data Log) (
 }
 
 // GetDocument retrieves a document with the given ID from the "log" collection
-func (f *FirestoreClientFactory) GetDocument(ctx context.Context, id int64) (*Log, error) {
+func (f *FirestoreClientFactory) GetDocument(ctx context.Context, id string) (*Log, error) {
 	client, err := f.GetClient()
 	if err != nil {
 		return nil, err
 	}
 
-	docRef := client.Collection("log").Doc(fmt.Sprintf("%d", id))
+	docRef := client.Collection("log").Doc(fmt.Sprintf("%v", id))
 	doc, err := docRef.Get(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to retrieve document: %v", err)
 	}
 
 	var logData Log
 	if err := doc.DataTo(&logData); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to convert document data: %v", err)
 	}
 
 	return &logData, nil
@@ -177,10 +178,11 @@ func main() {
 	factory := FirestoreClientFactory{}
 	// Create a new log document
 	newLog := Log{
-		Input:     "example input",
-		Output:    "example output",
+		ID:        2,
+		Input:     "example input from main",
+		Output:    "example output from main",
 		Timestamp: time.Now(),
-		UserID:    "example_user",
+		UserID:    "example_user from main",
 	}
 
 	// Create a context with a timeout of 5 seconds
@@ -196,8 +198,10 @@ func main() {
 	log.Printf("Created document with ID: %s", docRef.ID)
 
 	// Retrieve the document from Firestore
-	retrievedLog, err := factory.GetDocument(ctx, newLog.ID)
+	retrievedLog, err := factory.GetDocument(ctx, docRef.ID)
 	if err != nil {
+		// Show id of document that failed to retrieve
+		log.Print(newLog.ID)
 		log.Fatalf("Failed to retrieve document: %v", err)
 	}
 
