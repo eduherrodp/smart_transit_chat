@@ -14,89 +14,15 @@
  * the "log" collection using the singleton instance of firestore.Client.
  */
 
-package main
+package cmd
 
 import (
+	"cloud.google.com/go/firestore"
 	"context"
 	"fmt"
 	"log"
-	"sync"
 	"time"
-
-	"cloud.google.com/go/firestore"
-	"github.com/spf13/viper"
 )
-
-// Config represents the configuration struct that is used
-// to store configuration values from the YAML config file
-type Config struct {
-	// ProjectID is the ID of the project to run the sample
-	ProjectID string `mapstructure:"project_id"`
-}
-
-// This is a singleton instance of firestore.Client
-var (
-	client *firestore.Client
-	// TODO: Apply the singleton pattern to the FirestoreClientFactory
-	_ sync.Once
-)
-
-// GetProjectID reads the configuration values from the YAML
-// config file and returns the project ID
-func GetProjectID() string {
-	// Load configuration from file
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Error reading config file: %s", err)
-	}
-
-	// Unmarshal configuration into struct
-	var config Config
-	if err := viper.Unmarshal(&config); err != nil {
-		log.Fatalf("Unable to decode config file: %v", err)
-	}
-
-	log.Printf("Project ID: %s", config.ProjectID)
-	return config.ProjectID
-}
-
-// CreateClient creates a Firestore client using the provided
-// project ID and returns the client
-func CreateClient(ctx context.Context, projectID string) (*firestore.Client, error) {
-	client, err := firestore.NewClient(ctx, projectID)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
-}
-
-// FirestoreClientFactory is a factory for creating Firestore clients
-type FirestoreClientFactory struct {
-	once sync.Once
-}
-
-// GetClient returns a singleton instance of firestore.Client
-// by creating the client if it doesn't exist
-func (f *FirestoreClientFactory) GetClient() (*firestore.Client, error) {
-	var err error
-	f.once.Do(func() {
-		// Get project ID from config file
-		projectID := GetProjectID()
-
-		// Get a Firestore client
-		ctx := context.Background()
-		client, err = CreateClient(ctx, projectID)
-		if err != nil {
-			log.Fatalf("Failed to create Firestore client: %v", err)
-		}
-	})
-
-	return client, err
-}
-
-// Log Define a struct to represent a log document
 type Log struct {
 	ID        int64     `firestore:"id,omitempty"`
 	Input     string    `firestore:"input,omitempty"`
@@ -172,6 +98,8 @@ func (f *FirestoreClientFactory) DeleteDocument(ctx context.Context, id int64) e
 
 	return nil
 }
+	"time"
+)
 
 func main() {
 	// Create an instance of the FirestoreClientFactory
@@ -215,12 +143,4 @@ func main() {
 	}
 
 	log.Printf("Updated document with ID %d", retrievedLog.ID)
-
-	//// Delete the document from Firestore
-	//err = factory.DeleteDocument(ctx, retrievedLog.ID)
-	//if err != nil {
-	//	log.Fatalf("Failed to delete document: %v", err)
-	//}
-	//
-	//log.Printf("Deleted document with ID %d", retrievedLog.ID)
 }
