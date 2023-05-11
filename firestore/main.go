@@ -14,7 +14,7 @@
  * the "log" collection using the singleton instance of firestore.Client.
  */
 
-package cmd
+package firestore
 
 import (
 	"cloud.google.com/go/firestore"
@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"github.com/eduherrodp/smart_transit_chat/firestore/internal"
 )
 type Log struct {
 	ID        int64     `firestore:"id,omitempty"`
