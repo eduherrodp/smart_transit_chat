@@ -20,9 +20,6 @@ func GetProjectID() string {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("../config")
 
-	// Show path config file
-	log.Printf("Path config file: %s", viper.ConfigFileUsed())
-
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %s", err)
 	}

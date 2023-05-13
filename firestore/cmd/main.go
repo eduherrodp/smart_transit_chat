@@ -17,59 +17,13 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"example.com/m/v2/internal"
-	"io"
+	"example.com/m/v2/httpserver"
 	"log"
-	"net/http"
-	"time"
 )
 
 func main() {
-
-	// Rest API implementation for retrieving documents from the "log" collection
-	http.HandleFunc("/log", func(w http.ResponseWriter, r *http.Request) {
-		// Parse request body
-		var l internal.Log
-		err := json.NewDecoder(r.Body).Decode(&l)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
-				log.Printf("Error closing request body: %v", err)
-			}
-		}(r.Body)
-
-		// Create an instance of the FirestoreClientFactory
-		factory := internal.FirestoreClientFactory{}
-
-		// Create a context with a timeout of 5 seconds
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		// Create the document in Firestore
-		_, err = factory.CreateDocument(ctx, l)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Send response
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		err = json.NewEncoder(w).Encode(map[string]string{"status": "success"})
-		if err != nil {
-			return
-		}
-	})
-
 	port := ":8080"
-	log.Printf("Listening on port %s", port)
-	err := http.ListenAndServe(port, nil)
+	err := httpserver.StartServer(port)
 	if err != nil {
 		log.Fatal("Error starting server: ", err.Error())
 	}
