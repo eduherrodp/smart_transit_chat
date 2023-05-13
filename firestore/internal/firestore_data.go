@@ -9,7 +9,7 @@ import (
 
 // Log Define a struct to represent a log document
 type Log struct {
-	ID        int64     `firestore:"id,omitempty"`
+	ID        int64     `firestore:"id"`
 	Input     string    `firestore:"input,omitempty"`
 	Output    string    `firestore:"output,omitempty"`
 	Timestamp time.Time `firestore:"timestamp,omitempty"`
