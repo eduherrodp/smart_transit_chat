@@ -17,52 +17,14 @@
 package main
 
 import (
-	"context"
-	"example.com/m/v2/internal"
+	"example.com/m/v2/httpserver"
 	"log"
-	"time"
 )
 
 func main() {
-	// Create an instance of the FirestoreClientFactory
-	factory := internal.FirestoreClientFactory{}
-	// Create a new log document
-	newLog := internal.Log{
-		ID:        2,
-		Input:     "example input from main",
-		Output:    "example output from main",
-		Timestamp: time.Now(),
-		UserID:    "example_user from main",
-	}
-
-	// Create a context with a timeout of 5 seconds
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	// Create the document in Firestore
-	docRef, err := factory.CreateDocument(ctx, newLog)
+	port := ":8080"
+	err := httpserver.StartServer(port)
 	if err != nil {
-		log.Fatalf("Failed to create document: %v", err)
+		log.Fatal("Error starting server: ", err.Error())
 	}
-
-	log.Printf("Created document with ID: %s", docRef.ID)
-
-	// Retrieve the document from Firestore
-	retrievedLog, err := factory.GetDocument(ctx, docRef.ID)
-	if err != nil {
-		// Show id of document that failed to retrieve
-		log.Print(newLog.ID)
-		log.Fatalf("Failed to retrieve document: %v", err)
-	}
-
-	log.Printf("Retrieved document with ID %d: %+v", retrievedLog.ID, retrievedLog)
-
-	// Update the document in Firestore
-	retrievedLog.Output = "updated output"
-	err = factory.UpdateDocument(ctx, retrievedLog.ID, *retrievedLog)
-	if err != nil {
-		log.Fatalf("Failed to update document: %v", err)
-	}
-
-	log.Printf("Updated document with ID %d", retrievedLog.ID)
 }
