@@ -9,16 +9,20 @@ import (
 // to store configuration values from the YAML config file
 type Config struct {
 	// ProjectID is the ID of the project to run the sample
-	ProjectID string `firestore:"project_id"`
+	ProjectID string `mapstructure:"project_id"`
 }
 
 // GetProjectID reads the configuration values from the YAML
 // config file and returns the project ID
 func GetProjectID() string {
-	// Load configuration from file
-	viper.SetConfigName("config")
+	// Set the file name of the configurations file
+	viper.SetConfigName("config_yaml")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("../config")
+
+	// Show path config file
+	log.Printf("Path config file: %s", viper.ConfigFileUsed())
+
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %s", err)
 	}

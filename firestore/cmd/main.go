@@ -18,51 +18,59 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"example.com/m/v2/internal"
+	"io"
 	"log"
+	"net/http"
 	"time"
 )
 
 func main() {
-	// Create an instance of the FirestoreClientFactory
-	factory := internal.FirestoreClientFactory{}
-	// Create a new log document
-	newLog := internal.Log{
-		ID:        2,
-		Input:     "example input from main",
-		Output:    "example output from main",
-		Timestamp: time.Now(),
-		UserID:    "example_user from main",
-	}
 
-	// Create a context with a timeout of 5 seconds
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// Rest API implementation for retrieving documents from the "log" collection
+	http.HandleFunc("/log", func(w http.ResponseWriter, r *http.Request) {
+		// Parse request body
+		var l internal.Log
+		err := json.NewDecoder(r.Body).Decode(&l)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.Printf("Error closing request body: %v", err)
+			}
+		}(r.Body)
 
-	// Create the document in Firestore
-	docRef, err := factory.CreateDocument(ctx, newLog)
+		// Create an instance of the FirestoreClientFactory
+		factory := internal.FirestoreClientFactory{}
+
+		// Create a context with a timeout of 5 seconds
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		// Create the document in Firestore
+		_, err = factory.CreateDocument(ctx, l)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Send response
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		err = json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+		if err != nil {
+			return
+		}
+	})
+
+	port := ":8080"
+	log.Printf("Listening on port %s", port)
+	err := http.ListenAndServe(port, nil)
 	if err != nil {
-		log.Fatalf("Failed to create document: %v", err)
+		log.Fatal("Error starting server: ", err.Error())
 	}
-
-	log.Printf("Created document with ID: %s", docRef.ID)
-
-	// Retrieve the document from Firestore
-	retrievedLog, err := factory.GetDocument(ctx, docRef.ID)
-	if err != nil {
-		// Show id of document that failed to retrieve
-		log.Print(newLog.ID)
-		log.Fatalf("Failed to retrieve document: %v", err)
-	}
-
-	log.Printf("Retrieved document with ID %d: %+v", retrievedLog.ID, retrievedLog)
-
-	// Update the document in Firestore
-	retrievedLog.Output = "updated output"
-	err = factory.UpdateDocument(ctx, retrievedLog.ID, *retrievedLog)
-	if err != nil {
-		log.Fatalf("Failed to update document: %v", err)
-	}
-
-	log.Printf("Updated document with ID %d", retrievedLog.ID)
 }
