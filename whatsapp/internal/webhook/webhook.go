@@ -1,7 +1,6 @@
 package webhook
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,11 +8,12 @@ import (
 
 func VerifyTokenHandler(w http.ResponseWriter, r *http.Request, verifyToken string) {
 	if r.URL.Query().Get("hub.verify_token") == verifyToken {
-		fprintf, err := fmt.Fprintf(w, r.URL.Query().Get("hub.challenge"))
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(r.URL.Query().Get("hub.challenge")))
 		if err != nil {
+			log.Printf("Error writing response: %v", err)
 			return
 		}
-		log.Printf("VerifyTokenHandler: Wrote %d bytes to response.", fprintf)
 	} else {
 		http.Error(w, "Invalid verify token", http.StatusUnauthorized)
 	}
