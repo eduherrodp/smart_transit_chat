@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "@google-cloud/dialogflow": "^5.7.1",
+    "@google-cloud/dialogflow-cx": "^3.5.0",
+    "@grpc/grpc-js": "^1.8.14",
+    "dialogflow": "^1.2.0",
+    "google-auth-library": "^8.8.0",
+    "uuid": "^9.0.0"
+  },
+  "name": "dialogflow",
+  "version": "1.0.0",
+  "description": "dialogflow service ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jose Eduardo Hernandez Rodriguez",
+  "license": "ISC"
+}
