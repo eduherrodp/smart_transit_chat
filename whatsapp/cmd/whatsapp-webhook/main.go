@@ -11,10 +11,10 @@ func main() {
 	cfg := config.GetConfig()
 
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
-		webhook.VerifyTokenHandler(w, r, cfg.VerifyToken)
+		webhook.HandleWebhook(w, r, cfg.VerifyToken)
 	})
 
-	http.HandleFunc("/message", webhook.MessageReceivedHandler)
+	http.HandleFunc("/message", webhook.HandleMessage)
 
 	addr := ":" + cfg.Port
 	log.Printf("Server listening on %s", addr)

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func VerifyTokenHandler(w http.ResponseWriter, r *http.Request, verifyToken string) {
+func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 	if r.URL.Query().Get("hub.verify_token") == verifyToken {
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(r.URL.Query().Get("hub.challenge")))
@@ -19,7 +19,7 @@ func VerifyTokenHandler(w http.ResponseWriter, r *http.Request, verifyToken stri
 	}
 }
 
-func MessageReceivedHandler(w http.ResponseWriter, r *http.Request) {
+func HandleMessage(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusBadRequest)
