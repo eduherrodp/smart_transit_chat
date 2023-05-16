@@ -12,6 +12,10 @@ func main() {
 
 	http.HandleFunc("/messages", webhook.HandleMessage)
 
+	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
+		webhook.HandleWebhook(w, r, cfg.VerifyToken)
+	})
+
 	addr := ":" + cfg.Port
 	log.Printf("Server listening on %s", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
