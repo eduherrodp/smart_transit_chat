@@ -14,8 +14,6 @@ func main() {
 		webhook.HandleWebhook(w, r, cfg.VerifyToken)
 	})
 
-	http.HandleFunc("/message", webhook.HandleMessage)
-
 	addr := ":" + cfg.Port
 	log.Printf("Server listening on %s", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {

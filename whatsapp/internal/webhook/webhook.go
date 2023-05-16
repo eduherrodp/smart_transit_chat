@@ -1,31 +1,38 @@
 package webhook
 
 import (
-	"io/ioutil"
 	"log"
 	"net/http"
 )
 
+// HandleWebhook handles the webhook verification
+// We need get hub.mode, hub.verify_token and hub.challenge
+// from the query parameters of the request
+// and return hub.challenge back to Facebook
+// and check if hub.verify_token is equal to the verifyToken
+
 func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
-	if r.URL.Query().Get("hub.verify_token") == verifyToken {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte(r.URL.Query().Get("hub.challenge")))
-		if err != nil {
-			log.Printf("Error writing response: %v", err)
+	// Get query params
+	query := r.URL.Query()
+	mode := query.Get("hub.mode")
+	token := query.Get("hub.verify_token")
+	challenge := query.Get("hub.challenge")
+
+	// Check if mode and token are in the query params
+	if mode != "" && token != "" {
+		// Check if mode and token are correct
+		if mode == "subscribe" && token == verifyToken {
+			log.Println("Webhook verified!")
+			// Return challenge back to Facebook
+			_, err := w.Write([]byte(challenge))
+			if err != nil {
+				log.Println("Error writing challenge back to Facebook")
+				return
+			}
 			return
 		}
-	} else {
-		http.Error(w, "Invalid verify token", http.StatusUnauthorized)
-	}
-}
-
-func HandleMessage(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Error reading request body", http.StatusBadRequest)
-		return
 	}
 
-	log.Printf("Incoming message: %s", string(body))
-	w.WriteHeader(http.StatusOK)
+	log.Println("Webhook not verified!")
+	w.WriteHeader(http.StatusBadRequest)
 }
