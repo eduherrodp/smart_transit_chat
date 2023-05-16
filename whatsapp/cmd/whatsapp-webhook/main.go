@@ -10,6 +10,8 @@ import (
 func main() {
 	cfg := config.GetConfig()
 
+	http.HandleFunc("/message", webhook.HandleMessage)
+
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
 		webhook.HandleWebhook(w, r, cfg.VerifyToken)
 	})

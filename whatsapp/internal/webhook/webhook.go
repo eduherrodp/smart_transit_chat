@@ -1,9 +1,20 @@
 package webhook
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
+
+// ReceivedMessage represents the structure of the message received from WhatsApp
+type ReceivedMessage struct {
+	Message struct {
+		Text struct {
+			Body string `json:"body"`
+		} `json:"text"`
+	} `json:"message"`
+}
 
 // HandleWebhook handles the webhook verification
 // We need get hub.mode, hub.verify_token and hub.challenge
@@ -35,4 +46,30 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 
 	log.Println("Webhook not verified!")
 	w.WriteHeader(http.StatusBadRequest)
+}
+
+// HandleMessage Now if the webhook is verified, we can start receiving messages from WhatsApp.
+func HandleMessage(w http.ResponseWriter, r *http.Request) {
+	// Get the body of the request
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Error reading request body")
+		return
+	}
+
+	// Parse the body into a struct
+	var receivedMessage ReceivedMessage
+	err = json.Unmarshal(body, &receivedMessage)
+	if err != nil {
+		log.Println("Error parsing request body into struct")
+		return
+	}
+
+	// Get the message from the struct
+	message := receivedMessage.Message.Text.Body
+	log.Printf("Message received: %s", message)
+
+	// TODO: Process the message
+	// ...
+
 }
