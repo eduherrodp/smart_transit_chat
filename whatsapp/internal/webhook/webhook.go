@@ -59,6 +59,7 @@ func HandleMessage(w http.ResponseWriter, r *http.Request) {
 
 	// Parse the body into a struct
 	var receivedMessage ReceivedMessage
+	log.Printf("Received request: %s", string(body))
 	err = json.Unmarshal(body, &receivedMessage)
 	if err != nil {
 		log.Println("Error parsing request body into struct")
