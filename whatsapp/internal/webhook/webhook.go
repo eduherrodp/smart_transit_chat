@@ -1,46 +1,37 @@
 package webhook
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 )
 
-type ReceivedMessage struct {
-	Contacts []struct {
-		Profile struct {
-			Name string `json:"name"`
-		} `json:"profile"`
-		WaID string `json:"wa_id"`
-	} `json:"contacts"`
-	Messages []struct {
-		Context struct {
-			From string `json:"from"`
-			ID   string `json:"id"`
-		} `json:"context"`
-		From string `json:"from"`
-		ID   string `json:"id"`
-		Text struct {
-			Body string `json:"body"`
-		} `json:"text"`
-		Timestamp string `json:"timestamp"`
-		Type      string `json:"type"`
-	} `json:"messages"`
+// ReceivedWebhook represents the structure of the webhook payload received from WhatsApp
+type ReceivedWebhook struct {
+	Object string `json:"object"`
+	Entry  []struct {
+		ID      string `json:"id"`
+		Changes []struct {
+			Value struct {
+				MessagingProduct string `json:"messaging_product"`
+				Metadata         struct {
+					DisplayPhoneNumber string `json:"display_phone_number"`
+					PhoneNumberID      string `json:"phone_number_id"`
+				} `json:"metadata"`
+				// Add specific fields from the Webhook payload
+				// specific Webhooks payload
+			} `json:"value"`
+			Field string `json:"field"`
+		} `json:"changes"`
+	} `json:"entry"`
 }
 
-// HandleWebhook handles the webhook verification
-// We need get hub.mode, hub.verify_token and hub.challenge
-// from the query parameters of the request
-// and return hub.challenge back to Facebook
-// and check if hub.verify_token is equal to the verifyToken
-
+// HandleWebhook handles the webhook verification and message reception
 func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
-
-	// We need check if the request method came from Webhook Verify or from Whatsapp Message
-
-	// If the request method is GET, we need to verify the webhook
-	if r.Method == http.MethodGet { // Verify Webhook
+	// If the request method is GET, verify the webhook
+	if r.Method == http.MethodGet {
 		verifyWebhook(w, r, verifyToken)
-	} else if r.Method == http.MethodPost { // Receive Message
+	} else if r.Method == http.MethodPost {
 		receiveMessage(w, r)
 	} else {
 		log.Println("Method not allowed")
@@ -50,40 +41,46 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 
 // verifyWebhook verifies the webhook
 func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
+	// Get the query parameters
+	query := r.URL.Query()
+	mode := query.Get("hub.mode")
+	token := query.Get("hub.verify_token")
+	challenge := query.Get("hub.challenge")
 
-	// Get hub.mode, hub.verify_token and hub.challenge from the query parameters of the request
-	mode := r.URL.Query().Get("hub.mode")
-	token := r.URL.Query().Get("hub.verify_token")
-	challenge := r.URL.Query().Get("hub.challenge")
+	// Check if the query parameters are present
+	if mode == "" || token == "" {
+		log.Println("Missing query parameters")
+		http.Error(w, "Missing query parameters", http.StatusBadRequest)
+		return
+	}
 
-	// Check if hub.mode is equal to "subscribe"
-	// and hub.verify_token is equal to verifyToken
-	// and hub.challenge is not empty
-	if mode == "subscribe" && token == verifyToken && challenge != "" {
-		// Return hub.challenge back to Facebook
-		w.Write([]byte(challenge))
-	} else {
-		log.Println("Error verifying webhook")
-		http.Error(w, "Error verifying webhook", http.StatusBadRequest)
+	// Check if the mode is subscribed and the token is correct
+	if mode == "subscribe" && token == verifyToken {
+		log.Println("Webhook verified")
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write([]byte(challenge))
+		if err != nil {
+			log.Println("Error writing response")
+			return
+		}
+		return
 	}
 }
 
 // receiveMessage receives the message from WhatsApp
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
+	// Decode the JSON body
+	var receivedWebhook ReceivedWebhook
+	err := json.NewDecoder(r.Body).Decode(&receivedWebhook)
+	if err != nil {
+		log.Println("Error decoding JSON body")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	/*	// Decode the JSON data
-		var receivedMessage ReceivedMessage
-		if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
-			log.Println("Error decoding JSON data: ", err)
-			http.Error(w, "Error decoding JSON data", http.StatusBadRequest)
-			return
-		}*/
+	// Log the message received
+	log.Printf("Webhook received: %+v\n", receivedWebhook)
 
-	// Print the received message
-	//encoded, _ := json.MarshalIndent(receivedMessage, "", "  ")
-	log.Println("Received Message:")
-	log.Println(r.Body)
-
-	// Return a response
-	w.Write([]byte("Message received"))
+	// Access specific fields from the webhook payload
+	// specific Webhooks payload
 }
