@@ -28,6 +28,9 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 	token := query.Get("hub.verify_token")
 	challenge := query.Get("hub.challenge")
 
+	log.Println("Webhook received!")
+	log.Println("Request: ", r)
+	
 	// Check if mode and token are in the query params
 	if mode != "" && token != "" {
 		// Check if mode and token are correct
@@ -57,7 +60,7 @@ func HandleMessage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// SHow what we received
+	// Show what we received
 	log.Printf("Received message: %+v\n", receivedMessage)
 
 	// Get the message body
