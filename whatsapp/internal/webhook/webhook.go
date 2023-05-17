@@ -6,29 +6,37 @@ import (
 	"net/http"
 )
 
-type Message struct {
-	Context struct {
+type ReceivedMessage struct {
+	Contacts []struct {
+		Profile struct {
+			Name string `json:"name"`
+		} `json:"profile"`
+		WaID string `json:"wa_id"`
+	} `json:"contacts"`
+	Messages []struct {
+		Context struct {
+			From string `json:"from"`
+			ID   string `json:"id"`
+		} `json:"context"`
 		From string `json:"from"`
 		ID   string `json:"id"`
-	} `json:"context"`
-	From string `json:"from"`
-	ID   string `json:"id"`
-	Text struct {
-		Body string `json:"body"`
-	} `json:"text"`
-	Timestamp string `json:"timestamp"`
-	Type      string `json:"type"`
+		Text struct {
+			Body string `json:"body"`
+		} `json:"text"`
+		Timestamp string `json:"timestamp"`
+		Type      string `json:"type"`
+	} `json:"messages"`
 }
 
 // HandleWebhook handles the webhook verification
-// We need to get hub.mode, hub.verify_token, and hub.challenge
+// We need get hub.mode, hub.verify_token and hub.challenge
 // from the query parameters of the request
 // and return hub.challenge back to Facebook
 // and check if hub.verify_token is equal to the verifyToken
 
 func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 
-	// We need to check if the request method came from Webhook Verify or from WhatsApp Message
+	// We need check if the request method came from Webhook Verify or from Whatsapp Message
 
 	// If the request method is GET, we need to verify the webhook
 	if r.Method == http.MethodGet { // Verify Webhook
@@ -44,7 +52,7 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 // verifyWebhook verifies the webhook
 func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 
-	// Get hub.mode, hub.verify_token, and hub.challenge from the query parameters of the request
+	// Get hub.mode, hub.verify_token and hub.challenge from the query parameters of the request
 	mode := r.URL.Query().Get("hub.mode")
 	token := r.URL.Query().Get("hub.verify_token")
 	challenge := r.URL.Query().Get("hub.challenge")
@@ -65,26 +73,17 @@ func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the JSON data
-	var receivedMessage struct {
-		Messages []Message `json:"messages"`
-	}
+	var receivedMessage ReceivedMessage
 	if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
-		log.Println("Error decoding JSON data:", err)
+		log.Println("Error decoding JSON data: ", err)
 		http.Error(w, "Error decoding JSON data", http.StatusBadRequest)
 		return
 	}
 
-	// Get the first message
-	if len(receivedMessage.Messages) > 0 {
-		message := receivedMessage.Messages[0]
-
-		// Print the received message
-		log.Println("Message received:", message)
-
-		// Access specific fields
-		log.Println("From:", message.From)
-		log.Println("Text:", message.Text.Body)
-	}
+	// Print the received message
+	encoded, _ := json.MarshalIndent(receivedMessage, "", "  ")
+	log.Println("Received Message:")
+	log.Println(string(encoded))
 
 	// Return a response
 	w.Write([]byte("Message received"))
