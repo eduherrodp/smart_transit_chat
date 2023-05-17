@@ -2,7 +2,6 @@ package webhook
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -48,29 +47,23 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 	w.WriteHeader(http.StatusBadRequest)
 }
 
-// HandleMessage Now if the webhook is verified, we can start receiving messages from WhatsApp.
+// HandleMessage is with POST method
 func HandleMessage(w http.ResponseWriter, r *http.Request) {
-	// Get the body of the request
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Println("Error reading request body")
-		return
-	}
-
-	// Parse the body into a struct
+	// Decode the JSON body
 	var receivedMessage ReceivedMessage
-	log.Printf("Received request: %s", string(body))
-	err = json.Unmarshal(body, &receivedMessage)
+	err := json.NewDecoder(r.Body).Decode(&receivedMessage)
 	if err != nil {
-		log.Println("Error parsing request body into struct")
+		log.Println("Error decoding JSON body")
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	// SHow what we received
+	log.Printf("Received message: %+v\n", receivedMessage)
 
-	// Get the message from the struct
-	message := receivedMessage.Message.Text.Body
-	log.Printf("Message received: %s", message)
+	// Get the message body
+	messageBody := receivedMessage.Message.Text.Body
+	log.Printf("Message received: %s\n", messageBody)
 
-	// TODO: Process the message
-	// ...
-
+	// Write response
+	w.WriteHeader(http.StatusOK)
 }
