@@ -82,7 +82,7 @@ func receiveMessage(w http.ResponseWriter, r *http.Request) {
 	// Print the received message
 	//encoded, _ := json.MarshalIndent(receivedMessage, "", "  ")
 	log.Println("Received Message:")
-	log.Println(&r.Body)
+	log.Println(r.Body)
 
 	// Return a response
 	w.Write([]byte("Message received"))
