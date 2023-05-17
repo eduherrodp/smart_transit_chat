@@ -6,21 +6,31 @@ import (
 	"net/http"
 )
 
+type Profile struct {
+	Name string `json:"name"`
+}
+
 type Contact struct {
-	Profile struct {
-		Name string `json:"name"`
-	} `json:"profile"`
-	WaID string `json:"wa_id"`
+	Profile Profile `json:"profile"`
+	WaID    string  `json:"wa_id"`
+}
+
+type Context struct {
+	From string `json:"from"`
+	ID   string `json:"id"`
+}
+
+type Text struct {
+	Body string `json:"body"`
 }
 
 type Message struct {
-	From      string `json:"from"`
-	ID        string `json:"id"`
-	Timestamp string `json:"timestamp"`
-	Text      struct {
-		Body string `json:"body"`
-	} `json:"text"`
-	Type string `json:"type"`
+	Context   Context `json:"context"`
+	From      string  `json:"from"`
+	ID        string  `json:"id"`
+	Text      Text    `json:"text"`
+	Timestamp string  `json:"timestamp"`
+	Type      string  `json:"type"`
 }
 
 type ReceivedMessage struct {
@@ -29,14 +39,14 @@ type ReceivedMessage struct {
 }
 
 // HandleWebhook handles the webhook verification
-// We need get hub.mode, hub.verify_token and hub.challenge
+// We need to get hub.mode, hub.verify_token, and hub.challenge
 // from the query parameters of the request
 // and return hub.challenge back to Facebook
 // and check if hub.verify_token is equal to the verifyToken
 
 func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 
-	// We need check if the request method came from Webhook Verify or from Whatsapp Message
+	// We need to check if the request method came from Webhook Verify or from WhatsApp Message
 
 	// If the request method is GET, we need to verify the webhook
 	if r.Method == http.MethodGet { // Verify Webhook
@@ -52,7 +62,7 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 // verifyWebhook verifies the webhook
 func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 
-	// Get hub.mode, hub.verify_token and hub.challenge from the query parameters of the request
+	// Get hub.mode, hub.verify_token, and hub.challenge from the query parameters of the request
 	mode := r.URL.Query().Get("hub.mode")
 	token := r.URL.Query().Get("hub.verify_token")
 	challenge := r.URL.Query().Get("hub.challenge")
@@ -75,7 +85,7 @@ func receiveMessage(w http.ResponseWriter, r *http.Request) {
 	// Decode the JSON data
 	var receivedMessage ReceivedMessage
 	if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
-		log.Println("Error decoding JSON data: ", err)
+		log.Println("Error decoding JSON data:", err)
 		http.Error(w, "Error decoding JSON data", http.StatusBadRequest)
 		return
 	}
