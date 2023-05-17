@@ -1,9 +1,9 @@
 {
   "whatsapp": {
     "WHATSAPP_TOKEN": "EAAx1iTx7xK4BAPzDntesVHUZBZCKT3KDoX09q6ReL5A1QUa4OZBTGy5HP7ok5dyKTCgaNsSm0t4TshRnQQiXJmnnRjQkNnZBqEEB3kKwwSwlNhH59HcJLxNk97dxZBPZAVJCSU6SFwRnKk1R8TO1uAjs5pZC46YuDaZCZCAKucoCyU4thGLC08Ta7ZB9LRuv7mvf5yw1iVX6uxPcQVu412Y5MdQ2LpKW9hrlYZD",
-    "WHATSAPP_VERIFY_TOKEN": "whatsapp_test",
+    "WHATSAPP_VERIFY_TOKEN": "whatsapp_test"
   },
   "environment": {
-    "PORT": 3000,
+    "PORT": 3000
   }
 }
