@@ -6,36 +6,18 @@ import (
 	"net/http"
 )
 
-type Profile struct {
-	Name string `json:"name"`
-}
-
-type Contact struct {
-	Profile Profile `json:"profile"`
-	WaID    string  `json:"wa_id"`
-}
-
-type Context struct {
+type Message struct {
+	Context struct {
+		From string `json:"from"`
+		ID   string `json:"id"`
+	} `json:"context"`
 	From string `json:"from"`
 	ID   string `json:"id"`
-}
-
-type Text struct {
-	Body string `json:"body"`
-}
-
-type Message struct {
-	Context   Context `json:"context"`
-	From      string  `json:"from"`
-	ID        string  `json:"id"`
-	Text      Text    `json:"text"`
-	Timestamp string  `json:"timestamp"`
-	Type      string  `json:"type"`
-}
-
-type ReceivedMessage struct {
-	Contacts []Contact `json:"contacts"`
-	Messages []Message `json:"messages"`
+	Text struct {
+		Body string `json:"body"`
+	} `json:"text"`
+	Timestamp string `json:"timestamp"`
+	Type      string `json:"type"`
 }
 
 // HandleWebhook handles the webhook verification
@@ -83,15 +65,26 @@ func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the JSON data
-	var receivedMessage ReceivedMessage
+	var receivedMessage struct {
+		Messages []Message `json:"messages"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
 		log.Println("Error decoding JSON data:", err)
 		http.Error(w, "Error decoding JSON data", http.StatusBadRequest)
 		return
 	}
 
-	// Print the received message
-	log.Println(receivedMessage)
+	// Get the first message
+	if len(receivedMessage.Messages) > 0 {
+		message := receivedMessage.Messages[0]
+
+		// Print the received message
+		log.Println("Message received:", message)
+
+		// Access specific fields
+		log.Println("From:", message.From)
+		log.Println("Text:", message.Text.Body)
+	}
 
 	// Return a response
 	w.Write([]byte("Message received"))
