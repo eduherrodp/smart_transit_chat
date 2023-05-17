@@ -1,6 +1,7 @@
 package webhook
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -22,14 +23,53 @@ type ReceivedMessage struct {
 
 func HandleWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 
-	// Verify that the request came from Facebook
-	if r.URL.Query().Get("hub.mode") == "subscribe" && r.URL.Query().Get("hub.verify_token") == verifyToken {
-		// Respond with hub.challenge
-		log.Println("Webhook verified")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(r.URL.Query().Get("hub.challenge")))
+	// We need check if the request method came from Webhook Verify or from Whatsapp Message
+
+	// If the request method is GET, we need to verify the webhook
+	if r.Method == http.MethodGet { // Verify Webhook
+		verifyWebhook(w, r, verifyToken)
+	} else if r.Method == http.MethodPost { // Receive Message
+		receiveMessage(w, r)
 	} else {
-		log.Println("Webhook not verified")
-		w.WriteHeader(http.StatusForbidden)
+		log.Println("Method not allowed")
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// verifyWebhook verifies the webhook
+func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
+
+	// Get hub.mode, hub.verify_token and hub.challenge from the query parameters of the request
+	mode := r.URL.Query().Get("hub.mode")
+	token := r.URL.Query().Get("hub.verify_token")
+	challenge := r.URL.Query().Get("hub.challenge")
+
+	// Check if hub.mode is equal to "subscribe"
+	// and hub.verify_token is equal to verifyToken
+	// and hub.challenge is not empty
+	if mode == "subscribe" && token == verifyToken && challenge != "" {
+		// Return hub.challenge back to Facebook
+		w.Write([]byte(challenge))
+	} else {
+		log.Println("Error verifying webhook")
+		http.Error(w, "Error verifying webhook", http.StatusBadRequest)
+	}
+}
+
+// receiveMessage receives the message from WhatsApp
+func receiveMessage(w http.ResponseWriter, r *http.Request) {
+
+	// Decode the JSON message received into ReceivedMessage struct
+	var receivedMessage ReceivedMessage
+	if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
+		log.Println("Error decoding JSON message")
+		http.Error(w, "Error decoding JSON message", http.StatusBadRequest)
+		return
+	}
+
+	// Log the message received
+	log.Printf("Message received: %s", receivedMessage.Message.Text.Body)
+
+	// Return a 200 OK status to WhatsApp
+	w.WriteHeader(http.StatusOK)
 }
