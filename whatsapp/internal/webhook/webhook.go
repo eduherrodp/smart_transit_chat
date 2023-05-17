@@ -1,7 +1,6 @@
 package webhook
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -72,18 +71,18 @@ func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 // receiveMessage receives the message from WhatsApp
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
 
-	// Decode the JSON data
-	var receivedMessage ReceivedMessage
-	if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
-		log.Println("Error decoding JSON data: ", err)
-		http.Error(w, "Error decoding JSON data", http.StatusBadRequest)
-		return
-	}
+	/*	// Decode the JSON data
+		var receivedMessage ReceivedMessage
+		if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
+			log.Println("Error decoding JSON data: ", err)
+			http.Error(w, "Error decoding JSON data", http.StatusBadRequest)
+			return
+		}*/
 
 	// Print the received message
-	encoded, _ := json.MarshalIndent(receivedMessage, "", "  ")
+	//encoded, _ := json.MarshalIndent(receivedMessage, "", "  ")
 	log.Println("Received Message:")
-	log.Println(string(encoded))
+	log.Println(&r.Body)
 
 	// Return a response
 	w.Write([]byte("Message received"))
