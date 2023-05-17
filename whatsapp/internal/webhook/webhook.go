@@ -6,6 +6,13 @@ import (
 	"net/http"
 )
 
+// ReceivedMessage represents the structure of the message received from WhatsApp
+type ReceivedMessage struct {
+	Text struct {
+		Body string `json:"body"`
+	} `json:"text"`
+}
+
 // ReceivedWebhook represents the structure of the webhook payload received from WhatsApp
 type ReceivedWebhook struct {
 	Object string `json:"object"`
@@ -13,17 +20,19 @@ type ReceivedWebhook struct {
 		ID      string `json:"id"`
 		Changes []struct {
 			Value struct {
-				MessagingProduct string `json:"messaging_product"`
-				Metadata         struct {
-					DisplayPhoneNumber string `json:"display_phone_number"`
-					PhoneNumberID      string `json:"phone_number_id"`
-				} `json:"metadata"`
-				// Add specific fields from the Webhook payload
-				// specific Webhooks payload
+				MessagingProduct string          `json:"messaging_product"`
+				Metadata         Metadata        `json:"metadata"`
+				Message          ReceivedMessage `json:"message"` // Add this field to store the message
 			} `json:"value"`
 			Field string `json:"field"`
 		} `json:"changes"`
 	} `json:"entry"`
+}
+
+// Metadata represents the metadata structure within the webhook payload
+type Metadata struct {
+	DisplayPhoneNumber string `json:"display_phone_number"`
+	PhoneNumberID      string `json:"phone_number_id"`
 }
 
 // HandleWebhook handles the webhook verification and message reception
@@ -68,7 +77,6 @@ func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 }
 
 // receiveMessage receives the message from WhatsApp
-// receiveMessage receives the message from WhatsApp
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
 	// Decode the JSON body
 	var receivedWebhook ReceivedWebhook
@@ -95,12 +103,14 @@ func receiveMessage(w http.ResponseWriter, r *http.Request) {
 			metadata := value.Metadata
 
 			// Access the specific fields related to the message
-			// specific Webhooks payload
+			message := value.Message
+			messageBody := message.Text.Body
 
 			// Log the message received
 			log.Printf("Messaging Product: %s", messagingProduct)
 			log.Printf("Display Phone Number: %s", metadata.DisplayPhoneNumber)
 			log.Printf("Phone Number ID: %s", metadata.PhoneNumberID)
+			log.Printf("Message Body: %s", messageBody)
 		}
 	}
 
