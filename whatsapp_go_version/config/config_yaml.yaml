@@ -1,0 +1,2 @@
+port: "8080"
+verify_token: "whatsapp_test"
