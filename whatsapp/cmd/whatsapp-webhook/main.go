@@ -13,8 +13,6 @@ func main() {
 	// VerifyToken is the token used to verify the webhook and the verification will be process with GET method
 	// Messages will be received with POST method
 
-	http.HandleFunc("/messages", webhook.HandleMessage)
-
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, r *http.Request) {
 		webhook.HandleWebhook(w, r, cfg.VerifyToken)
 	})
