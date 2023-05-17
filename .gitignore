@@ -1,2 +1,3 @@
 ".idea/" 
 gcloud/SAK/private/
+/maps_api/config.py
