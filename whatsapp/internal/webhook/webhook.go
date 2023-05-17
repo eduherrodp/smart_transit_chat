@@ -6,33 +6,36 @@ import (
 	"net/http"
 )
 
-// ReceivedMessage represents the structure of the message received from WhatsApp
-type ReceivedMessage struct {
-	Text struct {
-		Body string `json:"body"`
-	} `json:"text"`
-}
-
-// ReceivedWebhook represents the structure of the webhook payload received from WhatsApp
 type ReceivedWebhook struct {
 	Object string `json:"object"`
 	Entry  []struct {
 		ID      string `json:"id"`
 		Changes []struct {
-			Value struct {
-				MessagingProduct string          `json:"messaging_product"`
-				Metadata         Metadata        `json:"metadata"`
-				Message          ReceivedMessage `json:"message"` // Add this field to store the message
-			} `json:"value"`
 			Field string `json:"field"`
+			Value struct {
+				MessagingProduct string `json:"messaging_product"`
+				Metadata         struct {
+					DisplayPhoneNumber string `json:"display_phone_number"`
+					PhoneNumberID      string `json:"phone_number_id"`
+				} `json:"metadata"`
+				Contacts []struct {
+					Profile struct {
+						Name string `json:"name"`
+					} `json:"profile"`
+					WAID string `json:"wa_id"`
+				} `json:"contacts"`
+				Messages []struct {
+					From      string `json:"from"`
+					ID        string `json:"id"`
+					Timestamp string `json:"timestamp"`
+					Type      string `json:"type"`
+					Text      struct {
+						Body string `json:"body"`
+					} `json:"text"`
+				} `json:"messages"`
+			} `json:"value"`
 		} `json:"changes"`
 	} `json:"entry"`
-}
-
-// Metadata represents the metadata structure within the webhook payload
-type Metadata struct {
-	DisplayPhoneNumber string `json:"display_phone_number"`
-	PhoneNumberID      string `json:"phone_number_id"`
 }
 
 // HandleWebhook handles the webhook verification and message reception
