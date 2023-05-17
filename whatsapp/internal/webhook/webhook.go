@@ -1,7 +1,6 @@
 package webhook
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -59,16 +58,11 @@ func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 // receiveMessage receives the message from WhatsApp
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
 
-	// Decode the JSON message received into ReceivedMessage struct
-	var receivedMessage ReceivedMessage
-	if err := json.NewDecoder(r.Body).Decode(&receivedMessage); err != nil {
-		log.Println("Error decoding JSON message")
-		http.Error(w, "Error decoding JSON message", http.StatusBadRequest)
-		return
-	}
+	// No decoding needed, just print the request body
+	// because the request body is already in JSON format
 
 	// Log the message received
-	log.Printf("Message received: %s", receivedMessage.Message.Text.Body)
+	log.Printf("Message received: %s", r.Body)
 
 	// Return a 200 OK status to WhatsApp
 	w.WriteHeader(http.StatusOK)
