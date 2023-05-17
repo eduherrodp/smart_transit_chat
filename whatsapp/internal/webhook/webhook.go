@@ -68,6 +68,7 @@ func verifyWebhook(w http.ResponseWriter, r *http.Request, verifyToken string) {
 }
 
 // receiveMessage receives the message from WhatsApp
+// receiveMessage receives the message from WhatsApp
 func receiveMessage(w http.ResponseWriter, r *http.Request) {
 	// Decode the JSON body
 	var receivedWebhook ReceivedWebhook
@@ -78,9 +79,31 @@ func receiveMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Log the message received
-	log.Printf("Webhook received: %+v\n", receivedWebhook)
+	// Access the first entry in the webhook payload
+	if len(receivedWebhook.Entry) > 0 {
+		entry := receivedWebhook.Entry[0]
 
-	// Access specific fields from the webhook payload
-	// specific Webhooks payload
+		// Access the first change in the entry
+		if len(entry.Changes) > 0 {
+			change := entry.Changes[0]
+
+			// Access the value field in the change
+			value := change.Value
+
+			// Access the messaging_product and metadata fields
+			messagingProduct := value.MessagingProduct
+			metadata := value.Metadata
+
+			// Access the specific fields related to the message
+			// specific Webhooks payload
+
+			// Log the message received
+			log.Printf("Messaging Product: %s", messagingProduct)
+			log.Printf("Display Phone Number: %s", metadata.DisplayPhoneNumber)
+			log.Printf("Phone Number ID: %s", metadata.PhoneNumberID)
+		}
+	}
+
+	// Return a 200 OK status to WhatsApp
+	w.WriteHeader(http.StatusOK)
 }
