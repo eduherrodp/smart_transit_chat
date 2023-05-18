@@ -7,6 +7,6 @@
   },
   "webhook": {
     "WEBHOOK_ENDPOINT": "/whatsapp",
-    "PORT": 1024,
+    "PORT": 1024
   }
 }
