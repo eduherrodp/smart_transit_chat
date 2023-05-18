@@ -3,17 +3,13 @@ function handleWebhook(req, res) {
     const { body } = req;
     console.log(JSON.stringify(body, null, 2));
     res.sendStatus(200);
-    // Extract the name, wa_id, timestamp, message from the body of the request
-    // position of the name in the body: entry->changes->contacts->profile->name
-    // position of the wa_id in the body: entry->changes->contacts->profile->wa_id
-    // position of the timestamp in the body: entry->changes->messages->timestamp
-    // position of the message in the body: entry->changes->messages->text->body.
+    const name = body.entry.changes.contacts.profile.name;
+    const waId = body.entry.changes.contacts.profile.wa_id;
+    const timestamp = body.entry.changes.messages.timestamp;
+    const message = body.entry.changes.messages.text.body;
 
-    // Print type of body
-    console.log("Type of body: " + typeof body);
+    console.log(`Name: ${name}`);
 
-    // Print the name
-    console.log("Name: " + body.entry[0].changes[0].contacts[0].profile.name);
 
 }
 
