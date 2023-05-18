@@ -83,8 +83,6 @@ def get_nearest_stations(location):
                 distance = distances.pop(0)
                 if distance < float('inf'):
                     nearest_stations.append({
-                        "route": filename[:-4],
-                        "stop": columns[0],
                         "name": columns[1],
                         "distance": distance
                     })
@@ -92,6 +90,36 @@ def get_nearest_stations(location):
                 print(f"\r{idx + 1}/{len(os.listdir('data/routes'))}", end="")
 
     return nearest_stations
+
+
+def get_nearest_station_info(location):
+    nearest_station = {}
+    nearest_distance = float('inf')
+    nearest_route_name = ""
+
+    with ThreadPoolExecutor() as executor:
+        futures = []
+        for filename in os.listdir("data/routes"):
+            path = os.path.join("data/routes", filename)
+            with open(path) as file:
+                for line in file:
+                    columns = line.split(",")
+                    station_location = Location(float(columns[2]), float(columns[3]))
+                    distance = distance_between_locations(location, station_location)
+                    futures.append((distance, columns[1], filename))
+
+        for future in futures:
+            distance, station_name, route_name = future
+            if distance < nearest_distance:
+                nearest_distance = distance
+                nearest_station = {
+                    "name": station_name,
+                    "distance": distance
+                }
+                nearest_route_name = route_name
+
+    nearest_station["route_name"] = nearest_route_name
+    return nearest_station
 
 
 @app.route("/routes", methods=["GET"])
@@ -107,11 +135,12 @@ def get_routes():
 
     route = calculate_route(origin_location, destination_location)
 
-    nearest_stations = get_nearest_stations(origin_location)
+    nearest_station_info = get_nearest_station_info(origin_location)
 
     response = {
-        "route": route,
-        "nearest_stations": nearest_stations
+        "start_address": route["routes"][0]["legs"][0]["start_address"],
+        "end_address": route["routes"][0]["legs"][0]["end_address"],
+        "nearest_station_info": nearest_station_info
     }
 
     return jsonify(response)
