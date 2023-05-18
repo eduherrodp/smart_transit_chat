@@ -137,10 +137,31 @@ def get_routes():
 
     nearest_station_info = get_nearest_station_info(origin_location)
 
-    response = {
-        "start_address": route["routes"][0]["legs"][0]["start_address"],
-        "end_address": route["routes"][0]["legs"][0]["end_address"],
-        "nearest_station_info": nearest_station_info
-    }
+    # Obtener la última etapa de la ruta
+    last_step = route["routes"][0]["legs"][0]["steps"][-1]
+    last_step_location = Location(last_step["end_location"]["lat"], last_step["end_location"]["lng"])
+
+    # Obtener la parada más cercana al destino
+    destination_station_info = get_nearest_station_info(destination_location)
+
+    # Verificar si la ruta de origen y destino son iguales
+    if nearest_station_info["route_name"] == destination_station_info["route_name"]:
+        response = {
+            "start_address": route["routes"][0]["legs"][0]["start_address"],
+            "end_address": route["routes"][0]["legs"][0]["end_address"],
+            "nearest_station_info": nearest_station_info,
+            "destination_station_info": destination_station_info
+        }
+    else:
+        response = {
+            "start_address": route["routes"][0]["legs"][0]["start_address"],
+            "end_address": route["routes"][0]["legs"][0]["end_address"],
+            "nearest_station_info": nearest_station_info,
+            "destination_station_info": {
+                "distance": None,
+                "name": "No hay una parada cercana en la misma ruta",
+                "route_name": None
+            }
+        }
 
     return jsonify(response)
