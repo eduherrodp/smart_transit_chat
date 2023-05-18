@@ -55,7 +55,8 @@ def calculate_route(origin, destination):
 def distance_between_locations(location):
     # Initialize the shortest distance to a very large number
     shortest_distance = float('inf')
-    nearest_station = None
+    nearest_stations = []
+
     # Calculate the distance between two locations using Distance Matrix API from Google Maps
     # Construct the URL for the GET request to the Distance Matrix API
     distance_matrix_url = "https://maps.googleapis.com/maps/api/distancematrix/json"
@@ -95,8 +96,9 @@ def distance_between_locations(location):
                                 "longitude": columns[3],
                                 "route": filename,
                             }
+                            nearest_stations.append(nearest_station)
 
-    return nearest_station
+    return nearest_stations
 
 
 @app.route('/calculate-route', methods=['POST'])
@@ -122,18 +124,28 @@ def handle_calculate_route():
             "distance": directions_response["routes"][0]["legs"][0]["distance"]["text"]
         }
 
-        # Here we are calculating the nearest station from the origin
-        # call function distance_between_locations with start_location as parameter
-        # nearest_station_from_origin and nearest_station_from_destination must belong to the same route
+        # Here we are calculating the nearest stations from the origin
+        # Call the function distance_between_locations with start_location as parameter
+        # Only select the stations that belong to the same route as the nearest station from the origin
 
         start_location = Location(response["start_location"]["latitude"], response["start_location"]["longitude"])
         end_location = Location(response["end_location"]["latitude"], response["end_location"]["longitude"])
-        nearest_station_from_origin = distance_between_locations(start_location)
-        nearest_station_from_destination = distance_between_locations(end_location)
-        response["nearest_station_from_origin"] = nearest_station_from_origin
-        response["nearest_station_from_destination"] = nearest_station_from_destination
+        nearest_stations_from_origin = distance_between_locations(start_location)
+        nearest_stations_from_destination = distance_between_locations(end_location)
+
+        # Filter stations that belong to the same route
+        nearest_stations_from_origin = [station for station in nearest_stations_from_origin if
+                                        station["route"] == nearest_stations_from_destination[0]["route"]]
+        nearest_stations_from_destination = [station for station in nearest_stations_from_destination if
+                                             station["route"] == nearest_stations_from_origin[0]["route"]]
+
+        # Sort stations by distance
+        nearest_stations_from_origin.sort(key=lambda x: x["distance"])
+        nearest_stations_from_destination.sort(key=lambda x: x["distance"])
+
+        response["nearest_stations_from_origin"] = nearest_stations_from_origin
+        response["nearest_stations_from_destination"] = nearest_stations_from_destination
 
         return jsonify(response)
-
     else:
         return jsonify({"error": "Invalid locations"})
