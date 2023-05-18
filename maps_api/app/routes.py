@@ -95,6 +95,7 @@ def distance_between_locations(location):
                                 "latitude": columns[2],
                                 "longitude": columns[3],
                                 "route": filename,
+                                "distance": distance  # Add distance to the dictionary
                             }
                             nearest_stations.append(nearest_station)
 
