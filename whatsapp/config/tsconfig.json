@@ -4,5 +4,9 @@
   },
   "environment": {
     "PORT": 1024
+  },
+  "webhook": {
+    "WEBHOOK_ENDPOINT": "/whatsapp",
+    "PORT": 1024,
   }
 }
