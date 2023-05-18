@@ -12,6 +12,9 @@ function handleWebhook(req, res) {
     // Print type of body
     console.log("Type of body: " + typeof body);
 
+    // Print the name
+    console.log("Name: " + body.entry[0].changes[0].contacts[0].profile.name);
+
 }
 
 function verifyWebhook(req, res) {
