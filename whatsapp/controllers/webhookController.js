@@ -1,14 +1,9 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
 function handleWebhook(req, res) {
     const { body } = req;
-    console.log(JSON.stringify(body, null, 2));
-    res.sendStatus(200);
-    const name = body.entry.changes.contacts.profile.name;
-    const waId = body.entry.changes.contacts.profile.wa_id;
-    const timestamp = body.entry.changes.messages.timestamp;
-    const message = body.entry.changes.messages.text.body;
+    // console.log(JSON.stringify(body, null, 2));
 
-    console.log(`Name: ${name}`);
+    console.log(body);
 
 
 }
