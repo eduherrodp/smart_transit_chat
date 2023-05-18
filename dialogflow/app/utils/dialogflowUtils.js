@@ -1,50 +1,51 @@
 // dialogflowUtils.js
-const dialogflow = require('@google-cloud/dialogflow');
+const { SessionsClient } = require('@google-cloud/dialogflow-cx');
 
-const sessionClient = new dialogflow.SessionsClient();
+// Endpoint configuration variables
 
-async function detectIntent(projectId, sessionId, query, contexts, languageCode) {
-    const sessionPath = sessionClient.projectAgentSessionPath(projectId, sessionId);
+const client = new SessionsClient({ apiEndpoint: 'us-central1-dialogflow.googleapis.com' });
+
+async function detectIntentText(projectId, location, agentId, sessionId, query, languageCode) {
+    const sessionPath = client.projectLocationAgentSessionPath(
+        projectId,
+        location,
+        agentId,
+        sessionId
+    );
+
+    console.info(sessionPath);
 
     const request = {
         session: sessionPath,
+        queryParams: {
+            disableWebhook: true,
+        },
         queryInput: {
             text: {
                 text: query,
-                languageCode: languageCode,
             },
-        },
-        queryParams: {
-            payload: {
-                fields: {
-                    actor: {
-                        stringValue: '5ec2d85a-2586-4594-a230-19928f05b854',
-                    },
-                },
-            },
+            languageCode: languageCode,
         },
     };
+    const [response] = await client.detectIntent(request);
+    console.log(`Detect Intent Request: ${request.queryParams.disableWebhook}`);
+    // Show intent match
+    console.log(`Detected Intent: ${response.queryResult.intent}`);
+    // Show what is received from dialogflow
+    console.log(`Query Text: ${response.queryResult.text}`);
 
-    if (contexts && contexts.length > 0) {
-        request.queryParams.contexts = contexts;
+
+    for (const message of response.queryResult.responseMessages) {
+        if (message.text) {
+            console.log(`Agent Response: ${message.text.text}`);
+        }
     }
 
-    const [response] = await sessionClient.detectIntent(request);
     return response;
 }
 
-async function executeQueries(projectId, sessionId, queries, languageCode) {
-    let context;
-    let intentResponse;
-    try {
-        intentResponse = await detectIntent(projectId, sessionId, queries.join(' '), context, languageCode);
-        context = intentResponse.queryResult.outputContexts;
-    } catch (error) {
-        console.log(error);
-    }
-    return intentResponse;
-}
+
 
 module.exports = {
-    executeQueries,
+    detectIntentText,
 };
