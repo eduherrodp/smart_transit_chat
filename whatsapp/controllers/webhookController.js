@@ -1,4 +1,5 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
+const fetch = require("node-fetch");
 function handleWebhook(req, res) {
     const { body } = req;
 
