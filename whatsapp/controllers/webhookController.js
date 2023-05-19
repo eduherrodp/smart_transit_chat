@@ -8,6 +8,7 @@ function handleWebhook(req, res) {
     console.log(name);
     console.log(wa_id);
 
+    // Notificar a whatsapp que se recibió el mensaje y cerrar el request
     res.status(200).send("EVENT_RECEIVED");
 }
 
