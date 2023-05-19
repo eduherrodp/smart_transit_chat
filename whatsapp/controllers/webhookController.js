@@ -53,8 +53,8 @@ function medium_webhook(response) {
     };
 
     const req = http.request(options, (res) => {
-        console.log(`statusCode: ${res.statusCode}`);
-
+        console.log();
+        console.log("Sent to medium webhook", `statusCode: ${res.statusCode}`);
         res.on("data", (d) => {
             process.stdout.write(d);
         });
@@ -66,8 +66,6 @@ function medium_webhook(response) {
 
     req.write(JSON.stringify(data));
     req.end();
-
-    console.log("Sent to medium webhook");
 }
 
 module.exports = {

@@ -20,9 +20,14 @@ func handleWhatsapp(w http.ResponseWriter, r *http.Request) {
 	// whatsapp webhook send a JSON with the following structure:
 	// data = {name,wa_id,message}
 
-	data := r.Body
+	// Get the query parameters
+	queryParams := r.URL.Query()
+
+	// Get the name of the user
+	name := queryParams.Get("name")
+
 	// Show in log what handle is working just now
-	log.Printf("Handling Whatsapp webhook: %s", data)
+	log.Printf("Handling request from %s", name)
 }
 
 // StartServer Function to start HTTP server
