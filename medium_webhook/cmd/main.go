@@ -37,7 +37,7 @@ func StartServer(port string) error {
 func main() {
 	// This webhook will be listening on the port 3000
 	// Start the HTTP server
-	err := StartServer(":1024")
+	err := StartServer(":3000")
 	if err != nil {
 		panic(err)
 	}

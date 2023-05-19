@@ -1,5 +1,5 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
-const fetch = require("node-fetch");
+const http = require("http");
 
 function handleWebhook(req, res) {
     const { body } = req;
@@ -40,22 +40,34 @@ function medium_webhook(response) {
         message,
     };
 
+    // Send this data to medium webhook, medium is listening on port 3000, and has a handle in /webhook/wahatsapp
+    // Do not use fetch
     const options = {
+        hostname: "localhost",
+        port: 3000,
+        path: "/webhook/whatsapp",
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
     };
 
-    try {
-        fetch("https://www.smarttransit.online/webhook/whatsapp", options)
-            .then(res => res.json())
-            .then(json => console.log(json))
-            .catch(err => console.log(err));
-    } catch (error) {
-        console.log(error);
-    }
+    const req = http.request(options, (res) => {
+        console.log(`statusCode: ${res.statusCode}`);
+
+        res.on("data", (d) => {
+            process.stdout.write(d);
+        });
+    });
+
+    req.on("error", (error) => {
+        console.error(error);
+    });
+
+    req.write(JSON.stringify(data));
+    req.end();
+
+    console.log("Sent to medium webhook");
 }
 
 module.exports = {
