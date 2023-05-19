@@ -4,16 +4,21 @@ function handleWebhook(req, res) {
 
     const name = body.entry[0].changes[0].value.contacts[0].profile.name;
     const wa_id = body.entry[0].changes[0].value.contacts[0].wa_id;
-    const timestamp = body.entry[0].changes[0].value.messages[0].timestamp;
     const message = body.entry[0].changes[0].value.messages[0].text.body;
+    // Set the time of the system
+    const time = new Date().toLocaleString();
 
-    console.log(name);
-    console.log(wa_id);
-    console.log(timestamp);
-    console.log(message);
+    console.log(time,"|> [Incoming message from whatsapp from]: ", wa_id)
+    console.log(name, "says: ", message);
+
+
+    const response = { name, wa_id, message };
 
     // Notificar a whatsapp que se recibió el mensaje y cerrar el request
     res.status(200).send("EVENT_RECEIVED");
+
+    // Sent to medium webhook
+    medium_webhook(response);
 }
 
 function verifyWebhook(req, res) {
