@@ -40,6 +40,8 @@ func handleWhatsapp(w http.ResponseWriter, r *http.Request) {
 	// Enviar la respuesta al webhook de Node.js
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(response))
+
+	log.Printf("Mensaje recibido: %s", data.Message)
 }
 
 // StartServer Function to start HTTP server
