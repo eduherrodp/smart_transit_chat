@@ -35,8 +35,30 @@ function verifyWebhook(req, res) {
 }
 
 // Function to  construct a message to send a medium_webhook
-function medium_webhook(body) {
-
+function medium_webhook(response) {
+    // Send to medium webhook
+    const { name, wa_id, message } = response;
+    const data = {
+        name,
+        wa_id,
+        message,
+    }
+    const options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        endpoint: "/webhook/whatsapp",
+    }
+    try {
+            fetch("https://medium-webhook.herokuapp.com/webhook/whatsapp", options)
+            .then(res => res.json())
+            .then(json => console.log(json))
+            .catch(err => console.log(err));
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 module.exports = {

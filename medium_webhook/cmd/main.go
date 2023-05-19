@@ -16,30 +16,19 @@ import (
 // 6. When the user receive the response
 
 func handleWhatsapp(w http.ResponseWriter, r *http.Request) {
-	// Return a simple Hello World message
-	// Get the query parameters
-	message := r.URL.Query().Get("message")
-	// If message is empty, return an error
-	if message == "" {
-		log.Printf("Message is empty")
-		http.Error(w, "Message is empty", http.StatusBadRequest)
-		return
-	} else {
-		log.Printf("Message: %s", message)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte(`Hello from server, I received your message`))
-		if err != nil {
-			log.Printf("Error writing response: %v", err)
-			return
-		}
-	}
+	// Interceptor of the request
+	// whatsapp webhook send a JSON with the following structure:
+	// data = {name,wa_id,message}
+
+	data := r.Body
+	// Show in log what handle is working just now
+	log.Printf("Handling Whatsapp webhook: %s", data)
 }
 
 // StartServer Function to start HTTP server
 func StartServer(port string) error {
 	// Whatsapp endpoint
-	http.HandleFunc("/whatsapp", handleWhatsapp)
+	http.HandleFunc("/webhook/whatsapp", handleWhatsapp)
 	// Start HTTP server
 	log.Printf("Listening on port %s", port)
 	return http.ListenAndServe(port, nil)
