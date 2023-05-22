@@ -1,9 +1,6 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
 const http = require("http");
 
-
-
-
 function handleWebhook(req, res) {
     const { body } = req;
     const name = body.entry[0].changes[0].value.contacts[0].profile.name;
@@ -15,7 +12,7 @@ function handleWebhook(req, res) {
 
     res.status(200).send("EVENT_RECEIVED");
 
-    medium_webhook(response);
+    mediumWebhook(response);
     console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message)
 }
 
@@ -32,8 +29,8 @@ function verifyWebhook(req, res) {
     }
 }
 
-function medium_webhook(response) {
-    const { name, wa_id, message } = response;
+function mediumWebhook(res) {
+    const { name, wa_id, message } = res;
     const data = {
         name,
         wa_id,
@@ -67,7 +64,44 @@ function medium_webhook(response) {
     req.end();
 }
 
+// Send message to whatsapp to the user with the data provided by the medium webhook
+function sendMessage(res) {
+    const { name, wa_id, message } = res;
+    const data = {
+        name,
+        wa_id,
+        message,
+    };
+
+    const options = {
+        hostname: "localhost",
+        port: 3000,
+        path: "/webhook",
+        method: "POST",
+        headers: {
+            "Authorization": "EAAx1iTx7xK4BAA2nFwEfzHe6XYMGMBaOFDWnPpQhrjwi9zDn1ZBJkLJ97ocqDhYisYmYgoZCT6Yv2JyQjLfOxxdr3JZA4RZCxfDqafYhouL2FJxmRZAxCm8taEvzWTrSF0NL2PAqgydYY7orBsQLaumdG1bI3ZBPOzLH7czy3B8uDHP9wCxS9WJaP554XxRBCYG7rA4KYfJxpuSCylLztoFdn8JFLPwUgZD",
+            "Content-Type": "application/json",
+            "X-Origin": "whatsapp"
+        },
+    }
+
+    const req = http.request(options, (res) => {
+        res.on("data", (d) => {
+            process.stdout.write(d);
+        });
+    });
+
+    req.on("error", (error) => {
+        console.error(error);
+    });
+
+    req.write(JSON.stringify(data));
+    req.end();
+}
+
+
 module.exports = {
     handleWebhook,
     verifyWebhook,
+    sendMessage,
 };

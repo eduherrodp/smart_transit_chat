@@ -3,7 +3,7 @@
     "WHATSAPP_VERIFY_TOKEN": "whatsapp_test"
   },
   "environment": {
-    "PORT": 1024
+    "PORT": 3000
   },
   "webhook": {
     "WEBHOOK_ENDPOINT": "/medium_webhook/whatsapp",

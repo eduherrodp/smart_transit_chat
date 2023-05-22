@@ -28,10 +28,6 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
         },
     };
     const [response] = await client.detectIntent(request);
-    console.log(`Detect Intent Request: ${request.queryParams.disableWebhook}`);
-    // Show intent match
-    console.log(`Detected Intent: ${response.queryResult.intent}`);
-    // Show what is received from dialogflow
     console.log(`Query Text: ${response.queryResult.text}`);
 
 

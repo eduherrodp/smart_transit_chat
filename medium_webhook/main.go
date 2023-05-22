@@ -18,7 +18,7 @@ type WhatsappStrategy struct {
 	Data map[string]interface{}
 }
 
-func (s WhatsappStrategy) ProcessResponse(responseData []byte) (string, error) {
+func (s WhatsappStrategy) ProcessResponse([]byte) (string, error) {
 	// Enviar la respuesta a Dialogflow utilizando el webhook
 	dialogflowWebhookURL := "http://localhost:3001/dialogflow"
 
@@ -39,32 +39,23 @@ func (s WhatsappStrategy) ProcessResponse(responseData []byte) (string, error) {
 	// Crear la solicitud HTTP
 	request, err := http.NewRequest("POST", dialogflowWebhookURL, bytes.NewBuffer(requestData))
 	if err != nil {
-		return "Error realizando la solicitud", err
+		return "Cannot send request to Dialogflow", err
 	}
 
-	// Agregar el header X-Origin
-	request.Header.Add("X-Origin", "whatsapp")
+	// Establecer el header de la solicitud
+	request.Header.Set("Content-Type", "application/json")
+
+	// Crear el cliente HTTP
+	client := &http.Client{}
 
 	// Enviar la solicitud al webhook de Dialogflow
-	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		return "Error realizando la solicitud", err
+		return "Cannot send request to Dialogflow", err
 	}
 
-	// Leer el cuerpo de la respuesta
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return "Error leyendo la respuesta", err
-	}
-
-	err = json.Unmarshal(body, &responseData)
-
-	if err != nil {
-		return "Error analizando la respuesta", err
-	}
-	// Devolver la respuesta de Dialogflow
-	return "Respuesta de Dialogflow", nil
+	// Do not return the response to the client because it is not necessary
+	return "Request sent to Dialogflow: " + response.Status, nil
 }
 
 // DialogflowStrategy Implementación de la estrategia para el servicio de Dialogflow
@@ -72,9 +63,51 @@ type DialogflowStrategy struct {
 	Data map[string]interface{}
 }
 
-func (s DialogflowStrategy) ProcessResponse(responseData []byte) (string, error) {
-	// Lógica específica para procesar la respuesta del servicio de Dialogflow
-	// y devolver una representación adecuada
+func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
+
+	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
+	whatsappWebhookURL := "http://localhost:3001/whatsapp"
+	//googleMapsWebhookURL := "http://localhost:3001/google-maps"
+
+	// Si queryResult->parameters->fields->location1->structValue->fields->original->stringValue
+	// es diferente de vacío entonces enviar la respuesta a google maps, de lo contrario enviar la respuesta a whatsapp
+
+	// Construir los datos de la solicitud al webhook de Whatsapp
+	//message is the response from Dialogflow:
+	// queryResult->responseMessages[0]->text->text[0]
+	// wa_id is the phone number of the user that sent the message and that is stored in the session id
+
+	requestBody := map[string]interface{}{
+		"message": s.Data["queryResult"].(map[string]interface{})["responseMessages"].([]interface{})[0].(map[string]interface{})["text"].(map[string]interface{})["text"].([]interface{})[0],
+		"wa_id":   s.Data["sessionId"],
+	}
+	// Convertir los datos de la solicitud a JSON
+	requestData, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", err
+	}
+
+	// Crear la solicitud HTTP
+	request, err := http.NewRequest("POST", whatsappWebhookURL, bytes.NewBuffer(requestData))
+	if err != nil {
+		return "Cannot send request to Whatsapp", err
+	}
+
+	// Establecer el header de la solicitud
+	request.Header.Set("Content-Type", "application/json")
+
+	// Crear el cliente HTTP
+	client := &http.Client{}
+
+	// Enviar la solicitud al webhook de Whatsapp
+	response, err := client.Do(request)
+	if err != nil {
+		return "Cannot send request to Whatsapp", err
+	}
+
+	log.Println("[" + "whatsapp" + "]: " + requestBody["message"].(string) + " | " + requestBody["wa_id"].(string))
+	log.Printf("Response from Whatsapp: %s", response.Status)
+
 	return "Respuesta de Dialogflow", nil
 }
 
@@ -105,11 +138,13 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			Data: requestData,
 		}
 		// Print the request data
-		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["message"].(string) + " | " + requestData["wa_id"].(string))
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["message"].(string) + " | " + requestData["wa_id"].(string) + " | " + requestData["wa_name"].(string))
 	case "dialogflow":
 		strategy = DialogflowStrategy{
 			Data: requestData,
 		}
+		// Print the request data
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["query"].(string) + " | " + requestData["sessionId"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
