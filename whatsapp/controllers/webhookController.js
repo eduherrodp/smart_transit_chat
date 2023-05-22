@@ -40,7 +40,7 @@ function medium_webhook(response) {
         message,
     };
 
-    // Send this data to medium webhook, medium is listening on port 3000, and has a handle in /webhook/wahatsapp
+    // Send this data to medium webhook, medium is listening on port 3000, and has a handle in /webhook
     // Do not use fetch
     const options = {
         hostname: "localhost",
@@ -54,8 +54,7 @@ function medium_webhook(response) {
     };
 
     const req = http.request(options, (res) => {
-        console.log("Sending the following data to medium webhook", data);
-        console.log(`statusCode: ${res.statusCode}`);
+        console.log("|| middle webhook", res.statusCode);
         res.on("data", (d) => {
             process.stdout.write(d);
         });

@@ -61,7 +61,10 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	// Determinar la estrategia basada en el header de la petición X-Origin-Service
 	var strategy ResponseStrategy
 
-	switch base64.StdEncoding.EncodeToString([]byte(r.Header.Get("X-Origin-Service"))) {
+	// The service fly in base 64
+	service := base64.StdEncoding.EncodeToString([]byte(r.Header.Get("X-Origin-Service")))
+
+	switch service {
 	// the value of the header is on base 64
 	case "whatsapp":
 		strategy = WhatsappStrategy{
