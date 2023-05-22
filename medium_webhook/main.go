@@ -147,24 +147,28 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Determinar la estrategia basada en el header de la petición X-Origin-Service
-	var strategy ResponseStrategy
+	var _ ResponseStrategy
 
 	// The service fly in base 64
 	switch r.Header.Get("X-Origin") {
 	// the value of the header is on base 64
 	case "whatsapp":
-		strategy = WhatsappStrategy{
+		_ = WhatsappStrategy{
 			Data: requestData,
 		}
 		// Print the request data
 		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["message"].(string) + " | " + requestData["wa_id"].(string) + " | " + requestData["name"].(string))
 	case "dialogflow":
-		strategy = DialogflowStrategy{
+		_ = DialogflowStrategy{
 			Data: requestData,
 		}
 		// Print the request data
 		if r.Header.Get("X-Intent") == "Destination Location" {
-			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
+			location1 := requestData["DestinationLocation"].(string)
+			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + location1)
+		} else if r.Header.Get("X-Intent") == "Origin Location" {
+			location2 := requestData["OriginLocation"].(string)
+			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + location2)
 		} else {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
 		}
@@ -173,23 +177,6 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseData := []byte("Respuesta del servicio")
-
-	// Procesar la respuesta con la estrategia seleccionada
-	result, err := strategy.ProcessResponse(responseData)
-	if err != nil {
-		http.Error(w, "Error al procesar la respuesta", http.StatusInternalServerError)
-		return
-	}
-
-	// Enviar la respuesta al cliente
-	write, err := w.Write([]byte(result))
-	if err != nil {
-		return
-	}
-	if write != len(result) {
-		return
-	}
 }
 
 func main() {

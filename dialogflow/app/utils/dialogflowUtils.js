@@ -28,6 +28,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     const [response] = await client.detectIntent(detectIntentRequest);
     console.log(`Query Text: ${response.queryResult.text}`);
     let location1;
+    let location2;
     if (response.queryResult.match.parameters != null) {
         location1 = response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue
         console.log("location1: ", response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue)
@@ -54,6 +55,17 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             'Content-Type': 'application/json',
             'X-Origin': 'dialogflow',
             'X-Intent': 'Destination Location',
+        }
+    } else if (location2 != null) {
+        data = {
+            'AgentResponse': agentResponse,
+            'SessionID': sessionId,
+            'OriginLocation': location2,
+        };
+        header = {
+            'Content-Type': 'application/json',
+            'X-Origin': 'dialogflow',
+            'X-Intent': 'Origin Location',
         }
     } else {
         data = {
