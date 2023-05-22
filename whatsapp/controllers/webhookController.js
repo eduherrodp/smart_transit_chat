@@ -1,5 +1,6 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
 const http = require("http");
+const {post} = require("axios");
 
 function handleWebhook(req, res) {
     const { body } = req;
@@ -12,8 +13,8 @@ function handleWebhook(req, res) {
 
     res.status(200).send("EVENT_RECEIVED");
 
-    mediumWebhook(response);
-    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message)
+    mediumWebhook(response).then(r => console.log(r));
+    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message);
 }
 
 function verifyWebhook(req, res) {
@@ -29,50 +30,32 @@ function verifyWebhook(req, res) {
     }
 }
 
-function mediumWebhook(res) {
-    const { name, wa_id, message } = res;
+async function mediumWebhook(response) {
+    const { name, wa_id, message } = response;
     const data = {
         name,
         wa_id,
         message,
     };
 
-    // Send this data to medium webhook, medium is listening on port 3000, and has a handle in /webhook
-    // Do not use fetch
-    const options = {
-        hostname: "localhost",
-        port: 3000,
-        path: "/webhook",
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-Origin": "whatsapp"
-        },
-    };
+    const mediumWebhookURL = 'http://localhost:3000/webhook';
 
-    const req = http.request(options, (res) => {
-        res.on("data", (d) => {
-            process.stdout.write(d);
+    try {
+        const axiosResponse = await post(mediumWebhookURL, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'whatsapp'
+            },
         });
-    });
 
-    req.on("error", (error) => {
-        console.error(error);
-    });
-
-    req.write(JSON.stringify(data));
-    req.end();
+        console.log(axiosResponse.data);
+    } catch (error) {
+        console.error("Error sending request to Medium Webhook: ", error);
+    }
 }
 
-// Send message to whatsapp to the user with the data provided by the medium webhook
-function sendMessage(req, res) {
-    // The request to send the message to whatsapp has the next structure
-    // curl -i -X POST \
-    // https://graph.facebook.com/v16.0/105954558954427/messages \
-    //     -H 'Authorization: Bearer EAAFl...' \
-    // -H 'Content-Type: application/json' \
-    // -d '{ "messaging_product": "whatsapp", "to": "15555555555", "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }'
-
+// Send message to WhatsApp user using Facebook Graph API
+async function sendMessage(req, res) {
     const { body } = req;
     const { wa_id, message } = body;
     const data = {
@@ -83,32 +66,31 @@ function sendMessage(req, res) {
             preview_url: false,
             body: message,
         },
-    }
+    };
 
     const options = {
-        hostname: "graph.facebook.com/v16.0/"+wa_id/+"messages",
+        hostname: "graph.facebook.com",
+        path: `/v16.0/${wa_id}/messages`,
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer EAAx1iTx7xK4BAPZBMrDoURgceb1Yb0MZBb4egtVeDgMXC8Y2jXTXqARfpIgAR48SQh8hLhZAecZBmZBd0WTmjxIxHoiJGWiOPqnoP39FloTayKRNK4PrIwZBnt4chG20fQSZBCJfduw8V4ZCUDKoThbi0LABpShJ94q4QOpqbpj7LddHUve4mY6gcpWZBMuyLBbXiawE0UalIQXxNZBRYrsVfNgmx6rsY5PmUZD"
+            "Authorization": "Bearer EAAx1iTx7xK4BALmtXqbsSQQZBHVKgcpmedk9llfbIhO2XNcytFs28fTbkjtNy7gRChGTJrJr0IxdpQ8J83AQY4URrAVFzHQBloZAIYX3rmZCicZBz9aUpQdA1lqMUjRDeCKtCpIufn4OqrZCEXZAs4bSMZAx5YVBOBUvLBgY4WzfAuaKKfd1NjkcaAa4wa3dgO96ejKkVkSlnrsleNUZC2EgUcr0PNSZAyRkZD"
         },
-        data: JSON.stringify(data),
-    }
+    };
 
-    const req = http.request(options, (res) => {
-        res.on("data", (d) => {
+    const httpRequest = http.request(options, (response) => {
+        response.on("data", (d) => {
             process.stdout.write(d);
         });
     });
 
-    req.on("error", (error) => {
+    httpRequest.on("error", (error) => {
         console.error(error);
     });
 
-    req.write(JSON.stringify(data));
-    req.end();
+    httpRequest.write(JSON.stringify(data));
+    httpRequest.end();
 }
-
 
 module.exports = {
     handleWebhook,
