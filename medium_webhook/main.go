@@ -20,7 +20,7 @@ type WhatsappStrategy struct {
 
 func (s WhatsappStrategy) ProcessResponse([]byte) (string, error) {
 	// Enviar la respuesta a Dialogflow utilizando el webhook
-	dialogflowWebhookURL := "http://localhost:3001/dialogflow"
+	dialogflowWebhookURL := "http://localhost:3002/dialogflow"
 
 	// Construir los datos de la solicitud al webhook de Dialogflow
 	requestBody := map[string]interface{}{
@@ -149,18 +149,6 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
 	}
-
-	responseData := []byte("Respuesta del servicio")
-
-	// Procesar la respuesta con la estrategia seleccionada
-	result, err := strategy.ProcessResponse(responseData)
-	if err != nil {
-		http.Error(w, "Error al procesar la respuesta", http.StatusInternalServerError)
-		return
-	}
-
-	// Enviar la respuesta al cliente
-	w.Write([]byte(result))
 }
 
 func main() {
