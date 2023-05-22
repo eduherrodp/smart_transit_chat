@@ -1,6 +1,5 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
 const http = require("http");
-const {toBase64} = require("request/lib/helpers");
 
 function handleWebhook(req, res) {
     const { body } = req;
@@ -10,13 +9,11 @@ function handleWebhook(req, res) {
     const message = body.entry[0].changes[0].value.messages[0].text.body;
     const time = new Date().toLocaleString();
 
-    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message)
-
     const response = { name, wa_id, message };
 
     res.status(200).send("EVENT_RECEIVED");
 
-    medium_webhook(response);
+    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message + medium_webhook(response))
 }
 
 function verifyWebhook(req, res) {
@@ -32,7 +29,8 @@ function verifyWebhook(req, res) {
     }
 }
 
-function medium_webhook(response) {
+function medium_webhook(response)  {
+    var statusCode;
     const { name, wa_id, message } = response;
     const data = {
         name,
@@ -54,7 +52,7 @@ function medium_webhook(response) {
     };
 
     const req = http.request(options, (res) => {
-        console.log("|| middle webhook", res.statusCode);
+        statusCode = res.statusCode;
         res.on("data", (d) => {
             process.stdout.write(d);
         });
@@ -66,6 +64,8 @@ function medium_webhook(response) {
 
     req.write(JSON.stringify(data));
     req.end();
+
+    return " |> [webhook]: " + statusCode;
 }
 
 module.exports = {
