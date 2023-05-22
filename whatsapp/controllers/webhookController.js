@@ -1,5 +1,5 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
-const http = require("http");
+const https = require("https");
 const {post} = require("axios");
 
 function handleWebhook(req, res) {
@@ -58,35 +58,29 @@ async function mediumWebhook(response) {
 async function sendMessage(req, res) {
     const { body } = req;
     const { wa_id, message } = body;
-    // Remove just the third character from the wa_id (521) -> the number 1
-    let phone_number = wa_id.slice(3);
-    // Add the country code to the phone number
-    phone_number = `52${phone_number}`;
+    const phone_number = "522471749048"
+
+
     const data = {
         messaging_product: "whatsapp",
-        to: phone_number,
-        type: "text",
-        text: {
-            preview_url: false,
-            body: message,
+        recipient: {
+            id: phone_number
         },
+        message: {
+            text: message
+        }
     };
 
     const options = {
         hostname: "graph.facebook.com",
-        path: `/v16.0/101271482969769/messages`,
+        path: `/v16.0/me/messages?access_token=YOUR_ACCESS_TOKEN`,
         method: "POST",
         headers: {
-            "Authorization": "Bearer EAAx1iTx7xK4BAKU1DAridiGi0ocDPRlHerLNL9EotS0RNHqzZCobhmXybe08MYNUWGSOxSip1s9ixGNQVswvJBXMFZCvEcRSzVkxOBfRqZCZB1NRjabbTsTkEFPp0n3juF8bVKd8I2WeGELd9lqovReYZAPcVFV2TdYbynv4wegLr6e7zKnJSSEGH59j3kkZClcoKMJa93jQWVoIFO0X62pNmPNaHloKwPa4UsHO83BgZDZD",
             "Content-Type": "application/json",
         },
     };
 
-    // Show the request data in the terminal
-    console.log("Request data: ", data);
-
-
-    const httpRequest = http.request(options, (response) => {
+    const httpRequest = https.request(options, (response) => {
         response.on("data", (d) => {
             process.stdout.write(d);
         });
@@ -99,6 +93,7 @@ async function sendMessage(req, res) {
     httpRequest.write(JSON.stringify(data));
     httpRequest.end();
 }
+
 
 module.exports = {
     handleWebhook,
