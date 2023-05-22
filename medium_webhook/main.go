@@ -166,7 +166,8 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("X-Intent") == "Destination Location" {
 			location1 := requestData["DestinationLocation"].(string)
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + location1)
-		} else if r.Header.Get("X-Intent") == "Origin Location" {
+		}
+		if r.Header.Get("X-Intent") == "Origin Location" {
 			location2 := requestData["OriginLocation"].(string)
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + location2)
 		} else {
