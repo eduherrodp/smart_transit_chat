@@ -174,6 +174,10 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			// We need to save the origin location
 			originLocation = requestData["OriginLocation"].(string)
 
+			// Mostar antes de enviar la respuesta originLocation y destinationLocation
+			log.Println("Origin Location: ", originLocation)
+			log.Println("Destination Location: ", destinationLocation)
+
 			// Get the response from googleMaps
 			response, err := http.Get("http://localhost:3003/google-maps?address=" + originLocation + "&destination=" + destinationLocation)
 			if err != nil {
