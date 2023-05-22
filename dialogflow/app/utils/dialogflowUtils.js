@@ -27,9 +27,10 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 
     const [response] = await client.detectIntent(detectIntentRequest);
     console.log(`Query Text: ${response.queryResult.text}`);
-
+    let agentResponse;
     for (const message of response.queryResult.responseMessages) {
         if (message.text) {
+            agentResponse = message.text.text;
             console.log(`Agent Response: ${message.text.text}`);
         }
     }
@@ -39,7 +40,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     let header;
     if (response.queryResult.match.intent.displayName === 'Destination Location') {
         data = {
-            'AgentResponse': response.queryResult.text,
+            'AgentResponse': agentResponse,
             'SessionID': sessionId,
             'DestinationLocation': response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue,
         };
