@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 )
 
 // ResponseStrategy Define una interfaz común para las estrategias
@@ -130,6 +129,9 @@ func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
 	return "", nil
 }
 
+var destinationLocation string
+var originLocation string
+
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	// Leer el cuerpo de la solicitud
 	body, err := ioutil.ReadAll(r.Body)
@@ -165,17 +167,15 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		// Print the request data
 		if r.Header.Get("X-Intent") == "Destination Location" {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
+			// We need to save the destination location
+			destinationLocation = requestData["DestinationLocation"].(string)
 		} else if r.Header.Get("X-Intent") == "Origin Location" {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["OriginLocation"].(string))
-
-			// Get request to googleMaps
-			// Get the origin location // We need to encode the string to url format
-			originLocation := url.QueryEscape(requestData["OriginLocation"].(string))
-			// Get the destination location
-			destinationLocation := url.QueryEscape(requestData["DestinationLocation"].(string))
+			// We need to save the origin location
+			originLocation = requestData["OriginLocation"].(string)
 
 			// Get the response from googleMaps
-			response, err := http.Get("http://localhost:3003/google-maps?origin=" + originLocation + "&destination=" + destinationLocation)
+			response, err := http.Get("http://localhost:3003/google-maps?address=" + originLocation + "&destination=" + destinationLocation)
 			if err != nil {
 				log.Println("Error al obtener la respuesta de Google Maps: ", err)
 				return
