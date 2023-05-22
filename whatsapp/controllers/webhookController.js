@@ -61,7 +61,7 @@ async function sendMessage(req, res) {
     // Remove just the third character from the wa_id (521) -> the number 1
     let phone_number = wa_id.slice(3);
     // Add the country code to the phone number
-    phone_number = `+52${phone_number}`;
+    phone_number = `52${phone_number}`;
     const data = {
         messaging_product: "whatsapp",
         to: phone_number,
