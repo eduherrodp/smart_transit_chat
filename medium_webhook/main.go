@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 // ResponseStrategy Define una interfaz común para las estrategias
@@ -174,9 +175,9 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			// We need to save the origin location
 			originLocation = requestData["OriginLocation"].(string)
 
-			// Mostar antes de enviar la respuesta originLocation y destinationLocation
-			log.Println("Origin Location: ", originLocation)
-			log.Println("Destination Location: ", destinationLocation)
+			// Mostar antes de enviar la respuesta originLocation y destinationLocation encode to send via url
+			log.Println("Origin Location: " + url.EscapeError(originLocation))
+			log.Println("Destination Location: " + url.EscapeError(destinationLocation))
 
 			// Get the response from googleMaps
 			response, err := http.Get("http://localhost:3003/google-maps?address=" + originLocation + "&destination=" + destinationLocation)
