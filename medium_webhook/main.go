@@ -20,7 +20,7 @@ type WhatsappStrategy struct {
 
 func (s WhatsappStrategy) ProcessResponse(responseData []byte) (string, error) {
 	// Enviar la respuesta a Dialogflow utilizando el webhook
-	dialogflowWebhookURL := "http://localhost:3000/dialogflow"
+	dialogflowWebhookURL := "http://localhost:3001/dialogflow"
 
 	// Construir los datos de la solicitud al webhook de Dialogflow
 	requestBody := map[string]interface{}{
@@ -31,23 +31,40 @@ func (s WhatsappStrategy) ProcessResponse(responseData []byte) (string, error) {
 	}
 
 	// Convertir los datos de la solicitud a JSON
-	jsonData, err := json.Marshal(requestBody)
+	requestData, err := json.Marshal(requestBody)
 	if err != nil {
 		return "", err
 	}
 
-	// Realizar la solicitud POST al webhook de Dialogflow
-	resp, err := http.Post(dialogflowWebhookURL, "application/json", bytes.NewBuffer(jsonData))
+	// Crear la solicitud HTTP
+	request, err := http.NewRequest("POST", dialogflowWebhookURL, bytes.NewBuffer(requestData))
 	if err != nil {
-		return "", err
+		return "Error realizando la solicitud", err
 	}
-	defer resp.Body.Close()
 
-	// Manejar la respuesta del webhook de Dialogflow si es necesario
+	// Agregar el header X-Origin
+	request.Header.Add("X-Origin", "whatsapp")
 
-	log.Printf("Respuesta de Dialogflow: %v", resp.Body)
+	// Enviar la solicitud al webhook de Dialogflow
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return "Error realizando la solicitud", err
+	}
 
-	return "Respuesta de Whatsapp", nil
+	// Leer el cuerpo de la respuesta
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "Error leyendo la respuesta", err
+	}
+
+	err = json.Unmarshal(body, &responseData)
+
+	if err != nil {
+		return "Error analizando la respuesta", err
+	}
+	// Devolver la respuesta de Dialogflow
+	return "Respuesta de Dialogflow", nil
 }
 
 // DialogflowStrategy Implementación de la estrategia para el servicio de Dialogflow
