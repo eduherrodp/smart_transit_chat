@@ -1,5 +1,6 @@
 const { WHATSAPP_VERIFY_TOKEN } = require("../config/tsconfig.json").whatsapp.WHATSAPP_VERIFY_TOKEN;
 const http = require("http");
+const {toBase64} = require("request/lib/helpers");
 
 function handleWebhook(req, res) {
     const { body } = req;
@@ -9,8 +10,7 @@ function handleWebhook(req, res) {
     const message = body.entry[0].changes[0].value.messages[0].text.body;
     const time = new Date().toLocaleString();
 
-    console.log(time, "|> [Incoming message from whatsapp from]: ", wa_id)
-    console.log(name, "says: ", message);
+    console.log(time, "|> [Incoming message from whatsapp from]: ", wa_id + ":", name, "|> [Message]: ", message)
 
     const response = { name, wa_id, message };
 
@@ -45,10 +45,11 @@ function medium_webhook(response) {
     const options = {
         hostname: "localhost",
         port: 3000,
-        path: "/webhook/whatsapp",
+        path: "/webhook",
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "X-Origin": toBase64("whatsapp")
         },
     };
 
