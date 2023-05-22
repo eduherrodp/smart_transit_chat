@@ -27,7 +27,12 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 
     const [response] = await client.detectIntent(detectIntentRequest);
     console.log(`Query Text: ${response.queryResult.text}`);
-    console.log(response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue)
+    let location1;
+    if (response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue != null) {
+        location1 = response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue
+        console.log("location1: ", response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue)
+
+    }
     let agentResponse;
     for (const message of response.queryResult.responseMessages) {
         if (message.text) {
@@ -44,7 +49,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
         data = {
             'AgentResponse': agentResponse,
             'SessionID': sessionId,
-            'DestinationLocation': response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue,
+            'DestinationLocation': location1,
         };
         header = {
             'Content-Type': 'application/json',
