@@ -27,6 +27,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 
     const [response] = await client.detectIntent(detectIntentRequest);
     console.log(`Query Text: ${response.queryResult.text}`);
+    console.log(response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue)
     let agentResponse;
     for (const message of response.queryResult.responseMessages) {
         if (message.text) {
