@@ -81,12 +81,53 @@ type DialogflowStrategy struct {
 
 func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
 	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
-	// whatsappWebhookURL := "http://localhost:1024/whatsapp"
+	whatsappWebhookURL := "http://localhost:1024/webhook/send-message"
 	//googleMapsWebhookURL := "http://localhost:3003/google-maps"
 
 	// Construir los datos de la solicitud al webhook de Whatsapp
+	requestBody := map[string]interface{}{
+		"wa_id":   s.Data["SessionID"],
+		"message": s.Data["AgentResponse"],
+	}
 
-	return "[medium webhook]: data received", nil
+	// Convertir los datos de la solicitud a JSON
+	requestData, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", err
+	}
+
+	// Crear la solicitud HTTP
+	request, err := http.NewRequest("POST", whatsappWebhookURL, bytes.NewBuffer(requestData))
+	if err != nil {
+		return "Cannot send request to Whatsapp", err
+	}
+
+	// Establecer el header de la solicitud
+	request.Header.Set("Content-Type", "application/json")
+
+	// Crear el cliente HTTP
+	client := &http.Client{}
+
+	// Enviar la solicitud al webhook de Whatsapp
+	response, err := client.Do(request)
+	if err != nil {
+		return "Cannot send request to Whatsapp", err
+	}
+
+	// Leer el cuerpo de la respuesta
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "Cannot read response from Whatsapp", err
+	}
+
+	// Decodificar el cuerpo de la respuesta en una estructura
+	var responseData map[string]interface{}
+	err = json.Unmarshal(body, &responseData)
+	if err != nil {
+		return "Cannot parse response from Whatsapp", err
+	}
+
+	return "", nil
 }
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {

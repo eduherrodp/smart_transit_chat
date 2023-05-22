@@ -73,39 +73,41 @@ function sendMessage(res) {
     // -H 'Content-Type: application/json' \
     // -d '{ "messaging_product": "whatsapp", "to": "15555555555", "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }'
 
-    // const { wa_id, message } = res;
-    // const data = {
-    //     messaging_product: "whatsapp",
-    //     to: wa_id,
-    //     type: "text",
-    //     text: {
-    //         body: message,
-    //     }
-    // }
-    //
-    // const options = {
-    //     hostname: "https://graph.facebook.com/v16.0/105954558954427/messages",
-    //     method: "POST",
-    //     headers: {
-    //         "Authorization": "EAAx1iTx7xK4BAA2nFwEfzHe6XYMGMBaOFDWnPpQhrjwi9zDn1ZBJkLJ97ocqDhYisYmYgoZCT6Yv2JyQjLfOxxdr3JZA4RZCxfDqafYhouL2FJxmRZAxCm8taEvzWTrSF0NL2PAqgydYY7orBsQLaumdG1bI3ZBPOzLH7czy3B8uDHP9wCxS9WJaP554XxRBCYG7rA4KYfJxpuSCylLztoFdn8JFLPwUgZD",
-    //         "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(data),
-    // }
-    //
-    // const req = http.request(options, (res) => {
-    //     res.on("data", (d) => {
-    //         process.stdout.write(d);
-    //     });
-    // });
-    //
-    // req.on("error", (error) => {
-    //     console.error(error);
-    // });
-    //
-    // req.write(JSON.stringify(data));
-    //
-    // req.end();
+    const { wa_id, message } = res;
+    const data = {
+        messaging_product: "whatsapp",
+        to: wa_id,
+        type: "text",
+        text: {
+            body: message,
+        }
+    }
+
+    const options = {
+        hostname: "https://graph.facebook.com/v16.0/105954558954427/messages",
+        method: "POST",
+        headers: {
+            "Authorization": "EAAx1iTx7xK4BAA2nFwEfzHe6XYMGMBaOFDWnPpQhrjwi9zDn1ZBJkLJ97ocqDhYisYmYgoZCT6Yv2JyQjLfOxxdr3JZA4RZCxfDqafYhouL2FJxmRZAxCm8taEvzWTrSF0NL2PAqgydYY7orBsQLaumdG1bI3ZBPOzLH7czy3B8uDHP9wCxS9WJaP554XxRBCYG7rA4KYfJxpuSCylLztoFdn8JFLPwUgZD",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    }
+
+    const req = http.request(options, (res) => {
+        res.on("data", (d) => {
+            process.stdout.write(d);
+        });
+
+        res.on("error", (error) => {
+            console.error(error);
+
+        });
+    });
+
+    console.log("Message sent to whatsapp", data);
+    console.log("req created", req);
+    req.write(JSON.stringify(data));
+    req.end();
 }
 
 
