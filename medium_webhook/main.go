@@ -66,7 +66,7 @@ type DialogflowStrategy struct {
 func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
 
 	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
-	whatsappWebhookURL := "http://localhost:3001/whatsapp"
+	whatsappWebhookURL := "http://localhost:1024/whatsapp"
 	//googleMapsWebhookURL := "http://localhost:3003/google-maps"
 
 	// Si queryResult->parameters->fields->location1->structValue->fields->original->stringValue
