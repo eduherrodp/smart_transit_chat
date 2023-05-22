@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -18,17 +19,36 @@ type WhatsappStrategy struct {
 }
 
 func (s WhatsappStrategy) ProcessResponse(responseData []byte) (string, error) {
+	// Enviar la respuesta a Dialogflow utilizando el webhook
+	dialogflowWebhookURL := "http://localhost:3000/dialogflow"
 
-	// Acceder a los datos específicos utilizando el mapa de datos
-	//name := s.Data["name"]
-	//waID := s.Data["wa_id"]
-	//message := s.Data["message"].(string)
+	// Construir los datos de la solicitud al webhook de Dialogflow
+	requestBody := map[string]interface{}{
+		"projectId":    "sanguine-tome-381917",
+		"sessionId":    s.Data["wa_id"],
+		"query":        s.Data["message"],
+		"languageCode": "es",
+	}
 
-	// Send the response to dialogflow using the webhook
+	// Convertir los datos de la solicitud a JSON
+	jsonData, err := json.Marshal(requestBody)
+	if err != nil {
+		return "", err
+	}
+
+	// Realizar la solicitud POST al webhook de Dialogflow
+	resp, err := http.Post(dialogflowWebhookURL, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// Manejar la respuesta del webhook de Dialogflow si es necesario
+
+	log.Printf("Respuesta de Dialogflow: %v", resp.Body)
+
 	return "Respuesta de Whatsapp", nil
 }
-
-// Function to send
 
 // DialogflowStrategy Implementación de la estrategia para el servicio de Dialogflow
 type DialogflowStrategy struct {
@@ -68,7 +88,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			Data: requestData,
 		}
 		// Print the request data
-		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["message"].(string) + " | " + requestData["wa_id"].(string) + " | " + requestData["name"].(string))
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["message"].(string) + " | " + requestData["wa_id"].(string)
 	case "dialogflow":
 		strategy = DialogflowStrategy{
 			Data: requestData,
