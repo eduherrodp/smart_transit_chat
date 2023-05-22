@@ -3,6 +3,6 @@
     "WHATSAPP_VERIFY_TOKEN": "whatsapp_test"
   },
   "environment": {
-    "PORT": 3001
+    "PORT": 1024
   }
 }
