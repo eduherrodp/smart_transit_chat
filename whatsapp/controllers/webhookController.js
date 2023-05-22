@@ -4,10 +4,10 @@ const {post} = require("axios");
 
 function handleWebhook(req, res) {
     const { body } = req;
-    const name = body.entry[0].changes[0].value.contacts[0].profile.name;
-    const wa_id = body.entry[0].changes[0].value.contacts[0].wa_id;
-    const message = body.entry[0].changes[0].value.messages[0].text.body;
-    const time = new Date().toLocaleString();
+    let name = body.entry[0].changes[0].value.contacts[0].profile.name;
+    let wa_id = body.entry[0].changes[0].value.contacts[0].wa_id;
+    let message = body.entry[0].changes[0].value.messages[0].text.body;
+    let time = new Date().toLocaleString();
 
     const response = { name, wa_id, message };
 
@@ -58,8 +58,7 @@ async function mediumWebhook(response) {
 async function sendMessage(req, res) {
     const { body } = req;
     const { wa_id, message } = body;
-    const phone_number = "522471749048"
-
+    const phone_number = wa_id.slice(0, 2) + wa_id.slice(3);
 
     const data = {
         messaging_product: "whatsapp",
@@ -73,7 +72,7 @@ async function sendMessage(req, res) {
 
     const options = {
         hostname: "graph.facebook.com",
-        path: `/v16.0/messages`,
+        path: `/v16.0/101271482969769/messages`,
         method: "POST",
         headers: {
             "Content-Type": "application/json",
