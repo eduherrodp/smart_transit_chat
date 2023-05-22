@@ -206,8 +206,12 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			name := data["name"].(string)
-			routeName := data["route_name"].(string)
+			// Acceder a destination_station_info
+			destinationLocation := data["destination_station_info"].(map[string]interface{})
+
+			// Acceder a name y route_name
+			name := destinationLocation["name"].(string)
+			routeName := destinationLocation["route_name"].(string)
 
 			log.Println("name: " + name)
 			log.Println("route_name: " + routeName)
