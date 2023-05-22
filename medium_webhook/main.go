@@ -67,7 +67,7 @@ func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
 
 	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
 	whatsappWebhookURL := "http://localhost:3001/whatsapp"
-	//googleMapsWebhookURL := "http://localhost:3001/google-maps"
+	//googleMapsWebhookURL := "http://localhost:3003/google-maps"
 
 	// Si queryResult->parameters->fields->location1->structValue->fields->original->stringValue
 	// es diferente de vacío entonces enviar la respuesta a google maps, de lo contrario enviar la respuesta a whatsapp
@@ -169,7 +169,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error al iniciar el servidor: ", err)
 		return
-	} else {
-		log.Println("Servidor iniciado en http://localhost:8080")
 	}
+	log.Println("Webhook is running on port ", 3000)
 }

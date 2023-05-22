@@ -40,8 +40,6 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     return response;
 }
 
-
-
 module.exports = {
     detectIntentText,
 };
