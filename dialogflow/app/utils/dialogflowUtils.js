@@ -50,14 +50,14 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     let data;
     if (response.queryResult.match.intent.displayName === 'Destination Location') {
         data = {
-            'Agent Response': response.queryResult.text,
-            'Session ID': sessionId,
-            'Destination Location': response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue,
+            'AgentResponse': response.queryResult.text,
+            'SessionID': sessionId,
+            'DestinationLocation': response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue,
         };
     } else {
         data = {
-            'Agent Response': response.queryResult.text,
-            'Session ID': sessionId,
+            'AgentResponse': response.queryResult.text,
+            'SessionID': sessionId,
         };
     }
 

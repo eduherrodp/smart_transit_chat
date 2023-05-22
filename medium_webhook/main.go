@@ -67,7 +67,11 @@ func (s WhatsappStrategy) ProcessResponse([]byte) (string, error) {
 		return "Cannot parse response from Dialogflow", err
 	}
 
-	return responseData["queryResult"].(map[string]interface{})["fulfillmentText"].(string), nil
+	// Construct the response to show in medium_webhook
+	// The response is in the format:
+	// queryResult->responseMessages[0]->text->text[0]
+	log.Printf("Response from Dialogflow: %s", responseData["AgentResponse"])
+	return "res", nil
 }
 
 // DialogflowStrategy Implementación de la estrategia para el servicio de Dialogflow
