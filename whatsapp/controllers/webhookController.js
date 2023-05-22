@@ -76,18 +76,20 @@ function sendMessage(res) {
     const { wa_id, message } = res;
     const data = {
         messaging_product: "whatsapp",
+        recipient_type: "individual",
         to: wa_id,
         type: "text",
         text: {
-            body: message,
+            "preview_url": false,
+            "text": message
         }
     }
 
     const options = {
-        hostname: "https://graph.facebook.com/v16.0/105954558954427/messages",
+        hostname: "https://graph.facebook.com/v16.0/"+ wa_id +"/messages",
         method: "POST",
         headers: {
-            "Authorization": "EAAx1iTx7xK4BAA2nFwEfzHe6XYMGMBaOFDWnPpQhrjwi9zDn1ZBJkLJ97ocqDhYisYmYgoZCT6Yv2JyQjLfOxxdr3JZA4RZCxfDqafYhouL2FJxmRZAxCm8taEvzWTrSF0NL2PAqgydYY7orBsQLaumdG1bI3ZBPOzLH7czy3B8uDHP9wCxS9WJaP554XxRBCYG7rA4KYfJxpuSCylLztoFdn8JFLPwUgZD",
+            "Authorization": "Bearer EAAx1iTx7xK4BAA2nFwEfzHe6XYMGMBaOFDWnPpQhrjwi9zDn1ZBJkLJ97ocqDhYisYmYgoZCT6Yv2JyQjLfOxxdr3JZA4RZCxfDqafYhouL2FJxmRZAxCm8taEvzWTrSF0NL2PAqgydYY7orBsQLaumdG1bI3ZBPOzLH7czy3B8uDHP9wCxS9WJaP554XxRBCYG7rA4KYfJxpuSCylLztoFdn8JFLPwUgZD",
             "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
