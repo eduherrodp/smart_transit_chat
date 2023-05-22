@@ -36,27 +36,38 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 
     // Prepare the data to be sent to the medium webhook
     let data;
+    let header;
     if (response.queryResult.match.intent.displayName === 'Destination Location') {
         data = {
             'AgentResponse': response.queryResult.text,
             'SessionID': sessionId,
             'DestinationLocation': response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue,
         };
+        header = {
+            'Content-Type': 'application/json',
+            'X-Origin': 'dialogflow',
+            'X-Intent': 'Destination Location',
+        }
     } else {
         data = {
             'AgentResponse': response.queryResult.text,
             'SessionID': sessionId,
         };
+        header = {
+            'Content-Type': 'application/json',
+            'X-Origin': 'dialogflow',
+            'X-Intent': 'Default Welcome Intent',
+        }
     }
 
-    await mediumWebhook(data);
+    await mediumWebhook(data, header);
 
     // Just need to return the state code to the client
     return "[dialogflow]: Received\n";
 }
 
 // mediumWebhook function sends the response to the medium webhook
-async function mediumWebhook(data) {
+async function mediumWebhook(data, header) {
     // Check if data has the Destination Location field
     const mediumWebhookURL = 'http://localhost:3000/webhook';
 
@@ -68,10 +79,7 @@ async function mediumWebhook(data) {
 
     try {
         const response = await axios.post(mediumWebhookURL, payload, {
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Origin': 'dialogflow',
-            },
+            headers: header,
         });
 
         console.log(response.data);

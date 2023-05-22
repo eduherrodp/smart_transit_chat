@@ -86,7 +86,7 @@ func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
 
 	// Construir los datos de la solicitud al webhook de Whatsapp
 
-	return "Respuesta de Dialogflow", nil
+	return "[medium webhook]: data received", nil
 }
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
@@ -122,7 +122,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			Data: requestData,
 		}
 		// Print the request data
-		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
