@@ -4,9 +4,22 @@ const {post} = require("axios");
 
 function handleWebhook(req, res) {
     const { body } = req;
-    let name = body.entry[0].changes[0].value.contacts[0].profile.name;
-    let wa_id = body.entry[0].changes[0].value.contacts[0].wa_id;
-    let message = body.entry[0].changes[0].value.messages[0].text.body;
+    // Check if body contains entry property
+    let name, wa_id, message;
+    if (body.hasOwnProperty("entry")) {
+        const { entry } = body;
+        const { messaging } = entry[0];
+        const { sender } = messaging[0];
+        const { message: text } = messaging[0];
+        name = sender.name;
+        wa_id = sender.id;
+        message = text.text;
+    } else {
+        name = body.name;
+        wa_id = body.wa_id;
+        message = body.message;
+    }
+
     let time = new Date().toLocaleString();
 
     const response = { name, wa_id, message };
@@ -55,7 +68,7 @@ async function mediumWebhook(response) {
 }
 
 // Send message to WhatsApp user using Facebook Graph API
-async function sendMessage(req, res) {
+async function sendMessage(req) {
     const { body } = req;
     const { wa_id, message } = body;
     const phone_number = wa_id.slice(0, 2) + wa_id.slice(3);
