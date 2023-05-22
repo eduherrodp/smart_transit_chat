@@ -6,11 +6,6 @@ const http = require("http");
 
 function handleWebhook(req, res) {
     const { body } = req;
-    body.entry = undefined;
-    body.entry[0].changes = undefined;
-    body.entry[0].changes[0].contacts = undefined;
-    body.entry[0].changes[0].value.messages = undefined;
-
     const name = body.entry[0].changes[0].value.contacts[0].profile.name;
     const wa_id = body.entry[0].changes[0].value.contacts[0].wa_id;
     const message = body.entry[0].changes[0].value.messages[0].text.body;

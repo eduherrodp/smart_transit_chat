@@ -45,7 +45,7 @@ func (s WhatsappStrategy) ProcessResponse(responseData []byte) (string, error) {
 
 	// Manejar la respuesta del webhook de Dialogflow si es necesario
 
-	// log.Printf("Respuesta de Dialogflow: %v", resp.Body)
+	log.Printf("Respuesta de Dialogflow: %v", resp.Body)
 
 	return "Respuesta de Whatsapp", nil
 }
