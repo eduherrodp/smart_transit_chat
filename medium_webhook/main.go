@@ -164,14 +164,11 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Crear el servidor HTTP
-	server := http.Server{
-		Addr: ":1024",
-	}
-
-	// Manejar las peticiones al endpoint /webhook
 	http.HandleFunc("/webhook", webhookHandler)
-
-	// Iniciar el servidor
-	server.ListenAndServe()
+	err := http.ListenAndServe(":1024", nil)
+	if err != nil {
+		log.Fatal("Error al iniciar el servidor: ", err)
+		return
+	}
+	log.Println("Webhook is running on port ", 1024)
 }
