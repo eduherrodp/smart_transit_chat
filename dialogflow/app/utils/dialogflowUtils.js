@@ -29,9 +29,12 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     console.log(`Query Text: ${response.queryResult.text}`);
     let location1;
     let location2;
-    if (response.queryResult.match.parameters != null) {
+    if (response.queryResult.match.parameters != null && location1 == null) {
         location1 = response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue
         console.log("location1: ", response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue)
+    } else if (response.queryResult.match.parameters != null && location1 != null) {
+        location2 = response.queryResult.match.parameters.fields.location2.structValue.fields.original.stringValue
+        console.log("location2: ", response.queryResult.match.parameters.fields.location2.structValue.fields.original.stringValue)
     }
     let agentResponse;
     for (const message of response.queryResult.responseMessages) {
@@ -56,7 +59,8 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             'X-Origin': 'dialogflow',
             'X-Intent': 'Destination Location',
         }
-    } else if (location2 != null) {
+    }
+    if (location2 != null) {
         data = {
             'AgentResponse': agentResponse,
             'SessionID': sessionId,
@@ -67,7 +71,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             'X-Origin': 'dialogflow',
             'X-Intent': 'Origin Location',
         }
-    } else {
+    } else if (location1 == null && location2 == null) {
         data = {
             'AgentResponse': agentResponse,
             'SessionID': sessionId,
