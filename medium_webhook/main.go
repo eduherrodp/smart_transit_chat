@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 // ResponseStrategy Define una interfaz común para las estrategias
@@ -82,7 +83,6 @@ type DialogflowStrategy struct {
 func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
 	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
 	whatsappWebhookURL := "http://localhost:1024/webhook/send-message"
-	//googleMapsWebhookURL := "http://localhost:3003/google-maps"
 
 	// Construir los datos de la solicitud al webhook de Whatsapp
 	requestBody := map[string]interface{}{
@@ -167,43 +167,39 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
 		} else if r.Header.Get("X-Intent") == "Origin Location" {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["OriginLocation"].(string))
-			// Una vez que se obtiene la ubicación de origen, se envía la solicitud al servicio de Google Maps para obtener la ruta entre el origen y el destino
-			// Construir los datos de la solicitud al webhook de Google Maps
-			requestBody := map[string]interface{}{
-				"address":     requestData["OriginLocation"].(string),
-				"destination": requestData["DestinationLocation"].(string),
-			}
-
-			// Convertir los datos de la solicitud a JSON
-			requestData, err := json.Marshal(requestBody)
-			if err != nil {
-				http.Error(w, "Error al analizar los datos", http.StatusBadRequest)
-				return
-			}
-
-			// Crear la solicitud HTTP
-			request, err := http.NewRequest("GET", "http://localhost:3003/google-maps", bytes.NewBuffer(requestData))
-			if err != nil {
-				http.Error(w, "Error al crear la solicitud", http.StatusBadRequest)
-				return
-			}
-
-			// Establecer el header de la solicitud
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("X-Origin", "dialogflow")
-
-			// Crear el cliente HTTP
-			client := &http.Client{}
-
-			// Enviar la solicitud al webhook de Google Maps
-			_, err = client.Do(request)
-			if err != nil {
-				http.Error(w, "Error al enviar la solicitud", http.StatusBadRequest)
-				return
-			}
-
 		} else {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
+
+			// Get request to googleMaps
+			// Get the origin location // We need to encode the string to url format
+			originLocation := url.QueryEscape(requestData["OriginLocation"].(string))
+			// Get the destination location
+			destinationLocation := url.QueryEscape(requestData["DestinationLocation"].(string))
+
+			// Get the response from googleMaps
+			response, err := http.Get("http://localhost:3003/google-maps?origin=" + originLocation + "&destination=" + destinationLocation)
+			if err != nil {
+				log.Println("Error al obtener la respuesta de Google Maps: ", err)
+				return
+			}
+
+			// Read the response body
+			body, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				log.Println("Error al leer la respuesta de Google Maps: ", err)
+				return
+			}
+			// Get route_name of the response, body->destination_station_info
+			destionationStationInfo := map[string]interface{}{}
+			err = json.Unmarshal(body, &destionationStationInfo)
+			if err != nil {
+				log.Println("Error al analizar la respuesta de Google Maps: ", err)
+				return
+			}
+			// Get route_name of the response, body->destination_station_info
+			routeName := destionationStationInfo["route_name"].(string)
+
+			log.Println(routeName)
 		}
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)

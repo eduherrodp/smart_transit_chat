@@ -127,10 +127,6 @@ def get_routes():
     address = request.args.get("address")
     destination = request.args.get("destination")
 
-    # Mostrar los datos de la dirección y el destino que se reciben
-    print(f"Address: {address}")
-    print(f"Destination: {destination}")
-
     origin_location = geocode(address)
     destination_location = geocode(destination)
 
@@ -151,16 +147,10 @@ def get_routes():
     # Verificar si la ruta de origen y destino son iguales
     if nearest_station_info["route_name"] == destination_station_info["route_name"]:
         response = {
-            "start_address": route["routes"][0]["legs"][0]["start_address"],
-            "end_address": route["routes"][0]["legs"][0]["end_address"],
-            "nearest_station_info": nearest_station_info,
             "destination_station_info": destination_station_info
         }
     else:
         response = {
-            "start_address": route["routes"][0]["legs"][0]["start_address"],
-            "end_address": route["routes"][0]["legs"][0]["end_address"],
-            "nearest_station_info": nearest_station_info,
             "destination_station_info": {
                 "distance": None,
                 "name": "No hay una parada cercana en la misma ruta",
