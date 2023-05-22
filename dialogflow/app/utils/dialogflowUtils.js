@@ -33,8 +33,6 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             // Save the agent response
             agentResponse = message.text.text[0];
             console.log(`Agent Response: ${message.text.text}`);
-            // Get the fields from the response
-            console.log(`Fields: ${message.payload.fields}`);
         }
     }
 
@@ -45,7 +43,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
         data = {
             'AgentResponse': agentResponse,
             'SessionID': sessionId,
-            'DestinationLocation': response.queryResult.parameters.fields['DestinationLocation'].stringValue,
+            'DestinationLocation': response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue,
         };
         header = {
             'Content-Type': 'application/json',
