@@ -170,8 +170,8 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			// Una vez que se obtiene la ubicación de origen, se envía la solicitud al servicio de Google Maps para obtener la ruta entre el origen y el destino
 			// Construir los datos de la solicitud al webhook de Google Maps
 			requestBody := map[string]interface{}{
-				"address":     requestData["OriginLocation"],
-				"destination": requestData["DestinationLocation"],
+				"address":     requestData["OriginLocation"].(string),
+				"destination": requestData["DestinationLocation"].(string),
 			}
 
 			// Convertir los datos de la solicitud a JSON
