@@ -167,8 +167,6 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
 		} else if r.Header.Get("X-Intent") == "Origin Location" {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["OriginLocation"].(string))
-		} else {
-			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
 
 			// Get request to googleMaps
 			// Get the origin location // We need to encode the string to url format
@@ -200,6 +198,9 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			routeName := destionationStationInfo["route_name"].(string)
 
 			log.Println(routeName)
+
+		} else {
+			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
 		}
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
