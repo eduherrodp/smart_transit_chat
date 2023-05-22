@@ -6,19 +6,26 @@ function handleWebhook(req, res) {
     const { body } = req;
 
     let name, wa_id, message;
-    name = body.entry[0].changes[0].value.contacts[0].profile.name;
-    wa_id = body.entry[0].changes[0].value.contacts[0].wa_id;
-    message = body.entry[0].changes[0].value.messages[0].text.body;
 
-    let time = new Date().toLocaleString();
+    if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.contacts && body.entry[0].changes[0].value.messages) {
+        name = body.entry[0].changes[0].value.contacts[0].profile.name;
+        wa_id = body.entry[0].changes[0].value.contacts[0].wa_id;
+        message = body.entry[0].changes[0].value.messages[0].text.body;
 
-    const response = { name, wa_id, message };
+        let time = new Date().toLocaleString();
 
-    res.status(200).send("EVENT_RECEIVED");
+        const response = { name, wa_id, message };
 
-    mediumWebhook(response).then(r => console.log(r));
-    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message);
+        res.status(200).send("EVENT_RECEIVED");
+
+        mediumWebhook(response).then(r => console.log(r));
+        console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message);
+    } else {
+        console.log("Invalid webhook data");
+        res.sendStatus(400);
+    }
 }
+
 
 function verifyWebhook(req, res) {
     const { "hub.mode": mode, "hub.verify_token": token, "hub.challenge": challenge } = req.query;
