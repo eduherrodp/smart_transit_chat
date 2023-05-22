@@ -44,7 +44,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     // Prepare the data to be sent to the medium webhook
     let data;
     let header;
-    if (response.queryResult.match.intent.displayName === 'Destination Location') {
+    if (location1 != null) {
         data = {
             'AgentResponse': agentResponse,
             'SessionID': sessionId,
