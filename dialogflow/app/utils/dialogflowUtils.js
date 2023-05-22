@@ -30,7 +30,8 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     let agentResponse;
     for (const message of response.queryResult.responseMessages) {
         if (message.text) {
-            agentResponse = message.text.text;
+            // Save the agent response
+            agentResponse = message.text.text[0];
             console.log(`Agent Response: ${message.text.text}`);
         }
     }
