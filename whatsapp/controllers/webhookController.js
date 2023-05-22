@@ -12,7 +12,7 @@ function handleWebhook(req, res) {
 
     res.status(200).send("EVENT_RECEIVED");
 
-    mediumWebhook(response);
+    // mediumWebhook(response);
     console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message)
 }
 
