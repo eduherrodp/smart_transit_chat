@@ -70,7 +70,7 @@ func (s WhatsappStrategy) ProcessResponse([]byte) (string, error) {
 	// Construct the response to show in medium_webhook
 	// The response is in the format:
 	// queryResult->responseMessages[0]->text->text[0]
-	log.Printf("Response from Dialogflow: %s", responseData["AgentResponse"])
+	log.Printf("[dialogflow]: %s", responseData["AgentResponse"])
 	return "res", nil
 }
 
@@ -80,49 +80,11 @@ type DialogflowStrategy struct {
 }
 
 func (s DialogflowStrategy) ProcessResponse([]byte) (string, error) {
-
 	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
-	whatsappWebhookURL := "http://localhost:1024/whatsapp"
+	// whatsappWebhookURL := "http://localhost:1024/whatsapp"
 	//googleMapsWebhookURL := "http://localhost:3003/google-maps"
 
-	// Si queryResult->parameters->fields->location1->structValue->fields->original->stringValue
-	// es diferente de vacío entonces enviar la respuesta a google maps, de lo contrario enviar la respuesta a whatsapp
-
 	// Construir los datos de la solicitud al webhook de Whatsapp
-	//message is the response from Dialogflow:
-	// queryResult->responseMessages[0]->text->text[0]
-	// wa_id is the phone number of the user that sent the message and that is stored in the session id
-
-	requestBody := map[string]interface{}{
-		"message": s.Data["queryResult"].(map[string]interface{})["responseMessages"].([]interface{})[0].(map[string]interface{})["text"].(map[string]interface{})["text"].([]interface{})[0],
-		"wa_id":   s.Data["sessionId"],
-	}
-	// Convertir los datos de la solicitud a JSON
-	requestData, err := json.Marshal(requestBody)
-	if err != nil {
-		return "", err
-	}
-
-	// Crear la solicitud HTTP
-	request, err := http.NewRequest("POST", whatsappWebhookURL, bytes.NewBuffer(requestData))
-	if err != nil {
-		return "Cannot send request to Whatsapp", err
-	}
-
-	// Establecer el header de la solicitud
-	request.Header.Set("Content-Type", "application/json")
-
-	// Crear el cliente HTTP
-	client := &http.Client{}
-
-	// Enviar la solicitud al webhook de Whatsapp
-	response, err := client.Do(request)
-	if err != nil {
-		return "Cannot send request to Whatsapp", err
-	}
-
-	log.Println("[" + "whatsapp" + "]: " + requestBody["message"].(string) + " | " + requestBody["wa_id"].(string))
-	log.Printf("Response from Whatsapp: %s", response.Status)
 
 	return "Respuesta de Dialogflow", nil
 }
@@ -160,7 +122,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			Data: requestData,
 		}
 		// Print the request data
-		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["query"].(string) + " | " + requestData["sessionId"].(string))
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return

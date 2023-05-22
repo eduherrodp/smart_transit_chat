@@ -1,5 +1,5 @@
-// dialogflowUtils.js
 const { SessionsClient } = require('@google-cloud/dialogflow-cx');
+const axios = require('axios');
 
 // Endpoint configuration variables
 
@@ -15,11 +15,8 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 
     console.info(sessionPath);
 
-    const request = {
+    const detectIntentRequest = {
         session: sessionPath,
-        queryParams: {
-            disableWebhook: true,
-        },
         queryInput: {
             text: {
                 text: query,
@@ -27,9 +24,9 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             languageCode: languageCode,
         },
     };
-    const [response] = await client.detectIntent(request);
-    console.log(`Query Text: ${response.queryResult.text}`);
 
+    const [response] = await client.detectIntent(detectIntentRequest);
+    console.log(`Query Text: ${response.queryResult.text}`);
 
     for (const message of response.queryResult.responseMessages) {
         if (message.text) {
@@ -37,16 +34,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
         }
     }
 
-    // We need to return the following:
-    // Agent Response: response.queryResult.text
-    // Session ID: sessionId
-
-    // If the display name intent is "Destination Location" then
-    // we need to return the following:
-    // Destination Location: queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue
-
-    // Construct the response
-
+    // Prepare the data to be sent to the medium webhook
     let data;
     if (response.queryResult.match.intent.displayName === 'Destination Location') {
         data = {
@@ -61,7 +49,35 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
         };
     }
 
-    return data;
+    await mediumWebhook(data);
+
+    // Just need to return the state code to the client
+    return "[dialogflow]: Received\n";
+}
+
+// mediumWebhook function sends the response to the medium webhook
+async function mediumWebhook(data) {
+    // Check if data has the Destination Location field
+    const mediumWebhookURL = 'http://localhost:1024/webhook';
+
+    const payload = {
+        'AgentResponse': data.AgentResponse,
+        'SessionID': data.SessionID,
+        'DestinationLocation': data.DestinationLocation,
+    };
+
+    try {
+        const response = await axios.post(mediumWebhookURL, payload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Origin': 'dialogflow',
+            },
+        });
+
+        console.log(response.data);
+    } catch (error) {
+        console.error("Error sending request to Medium Webhook: ", error);
+    }
 }
 
 module.exports = {
