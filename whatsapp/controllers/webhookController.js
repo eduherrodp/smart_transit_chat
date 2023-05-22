@@ -66,23 +66,31 @@ function mediumWebhook(res) {
 
 // Send message to whatsapp to the user with the data provided by the medium webhook
 function sendMessage(res) {
-    const { name, wa_id, message } = res;
+    // The request to send the message to whatsapp has the next structure
+    // curl -i -X POST \
+    // https://graph.facebook.com/v16.0/105954558954427/messages \
+    //     -H 'Authorization: Bearer EAAFl...' \
+    // -H 'Content-Type: application/json' \
+    // -d '{ "messaging_product": "whatsapp", "to": "15555555555", "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }'
+
+    const { wa_id, message } = res;
     const data = {
-        name,
-        wa_id,
-        message,
-    };
+        messaging_product: "whatsapp",
+        to: wa_id,
+        type: "text",
+        text: {
+            body: message,
+        }
+    }
 
     const options = {
-        hostname: "localhost",
-        port: 3000,
-        path: "/webhook",
+        hostname: "https://graph.facebook.com/v16.0/105954558954427/messages",
         method: "POST",
         headers: {
             "Authorization": "EAAx1iTx7xK4BAA2nFwEfzHe6XYMGMBaOFDWnPpQhrjwi9zDn1ZBJkLJ97ocqDhYisYmYgoZCT6Yv2JyQjLfOxxdr3JZA4RZCxfDqafYhouL2FJxmRZAxCm8taEvzWTrSF0NL2PAqgydYY7orBsQLaumdG1bI3ZBPOzLH7czy3B8uDHP9wCxS9WJaP554XxRBCYG7rA4KYfJxpuSCylLztoFdn8JFLPwUgZD",
             "Content-Type": "application/json",
-            "X-Origin": "whatsapp"
         },
+        body: JSON.stringify(data),
     }
 
     const req = http.request(options, (res) => {
@@ -96,6 +104,7 @@ function sendMessage(res) {
     });
 
     req.write(JSON.stringify(data));
+
     req.end();
 }
 
