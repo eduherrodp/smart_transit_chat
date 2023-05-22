@@ -58,9 +58,11 @@ async function mediumWebhook(response) {
 async function sendMessage(req, res) {
     const { body } = req;
     const { wa_id, message } = body;
+    // Remove the third character from the wa_id (521) -> the number 1
+    const phone_number = wa_id.slice(3);
     const data = {
         messaging_product: "whatsapp",
-        to: wa_id,
+        to: phone_number,
         type: "text",
         text: {
             preview_url: false,
@@ -80,7 +82,7 @@ async function sendMessage(req, res) {
 
     // Show the request data in the terminal
     console.log("Request data: ", data);
-    
+
 
     const httpRequest = http.request(options, (response) => {
         response.on("data", (d) => {
