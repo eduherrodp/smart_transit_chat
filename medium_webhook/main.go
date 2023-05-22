@@ -175,49 +175,43 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			// We need to save the origin location
 			originLocation = requestData["OriginLocation"].(string)
 
-			// Codify the originLocation and destinationLocation of the url to send to googleMaps
+			baseURL := "http://localhost:3003/google-maps"
 			params := url.Values{}
-			params.Add("address", originLocation)
-			params.Add("destination", destinationLocation)
-			encodeParams := params.Encode()
+			params.Set("address", originLocation)
+			params.Set("destination", destinationLocation)
 
-			// Create the url to send to googleMaps
-			googleMapsURL := "http://localhost:3004/google-maps?" + encodeParams
+			// Construir la URL completa con los parámetros codificados
+			fullURL := baseURL + "?" + params.Encode()
 
-			// Create the request to send to googleMaps
-			request, err := http.NewRequest("GET", googleMapsURL, nil)
+			// Hacer la solicitud GET a la URL
+			response, err := http.Get(fullURL)
 			if err != nil {
-				log.Println("Error al crear la solicitud a Google Maps: ", err)
+				log.Println("Error al enviar la solicitud:", err)
 				return
 			}
+			defer response.Body.Close()
 
-			// Create the client to send the request to googleMaps
-			client := &http.Client{}
-
-			// Send the request to googleMaps
-			response, err := client.Do(request)
-			if err != nil {
-				log.Println("Error al enviar la solicitud a Google Maps: ", err)
-				return
-			}
-
-			//Read the response body
+			// Leer el cuerpo de la respuesta
 			body, err := ioutil.ReadAll(response.Body)
 			if err != nil {
-				log.Println("Error al leer la respuesta de Google Maps: ", err)
+				log.Println("Error al leer la respuesta:", err)
 				return
 			}
-			// Get route_name of the response, body->destination_station_info
-			destinationStationInfo := map[string]interface{}{}
-			err = json.Unmarshal(body, &destinationStationInfo)
-			if err != nil {
-				log.Println("Error al analizar la respuesta de Google Maps: ", err)
-				return
-			}
-			// Get route_name of the response, body->destination_station_info
-			routeName := destinationStationInfo["route_name"].(string)
 
-			log.Println(routeName)
+			// Analizar la respuesta JSON
+			var data map[string]interface{}
+			err = json.Unmarshal(body, &data)
+			if err != nil {
+				log.Println("Error al analizar la respuesta JSON:", err)
+				return
+			}
+
+			// Obtener el valor de "route_name" si existe
+			if routeName, ok := data["route_name"].(string); ok {
+				log.Println("Route Name:", routeName)
+			} else {
+				log.Println("No se encontró el campo 'route_name' o no es una cadena")
+			}
 
 		} else {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
