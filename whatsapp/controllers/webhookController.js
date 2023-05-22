@@ -63,20 +63,21 @@ async function sendMessage(req, res) {
 
     const data = {
         messaging_product: "whatsapp",
-        recipient: {
-            id: phone_number
+        to: phone_number,
+        type: "text",
+        text: {
+            preview_url: false,
+            body: message,
         },
-        message: {
-            text: message
-        }
     };
 
     const options = {
         hostname: "graph.facebook.com",
-        path: `/v16.0/me/messages?access_token=YOUR_ACCESS_TOKEN`,
+        path: `/v16.0/messages`,
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Authorization": `Bearer `,
         },
     };
 
