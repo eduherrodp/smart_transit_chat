@@ -175,32 +175,47 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			// We need to save the origin location
 			originLocation = requestData["OriginLocation"].(string)
 
-			// Mostar antes de enviar la respuesta originLocation y destinationLocation encode to send via url
-			log.Println("Origin Location: " + url.EscapeError(originLocation))
-			log.Println("Destination Location: " + url.EscapeError(destinationLocation))
+			// Codify the originLocation and destinationLocation of the url to send to googleMaps
+			params := url.Values{}
+			params.Add("address", originLocation)
+			params.Add("destination", destinationLocation)
+			encodeParams := params.Encode()
 
-			// Get the response from googleMaps
-			response, err := http.Get("http://localhost:3003/google-maps?address=" + originLocation + "&destination=" + destinationLocation)
+			// Create the url to send to googleMaps
+			googleMapsURL := "http://localhost:3004/google-maps?" + encodeParams
+
+			// Create the request to send to googleMaps
+			request, err := http.NewRequest("GET", googleMapsURL, nil)
 			if err != nil {
-				log.Println("Error al obtener la respuesta de Google Maps: ", err)
+				log.Println("Error al crear la solicitud a Google Maps: ", err)
 				return
 			}
 
-			// Read the response body
+			// Create the client to send the request to googleMaps
+			client := &http.Client{}
+
+			// Send the request to googleMaps
+			response, err := client.Do(request)
+			if err != nil {
+				log.Println("Error al enviar la solicitud a Google Maps: ", err)
+				return
+			}
+
+			//Read the response body
 			body, err := ioutil.ReadAll(response.Body)
 			if err != nil {
 				log.Println("Error al leer la respuesta de Google Maps: ", err)
 				return
 			}
 			// Get route_name of the response, body->destination_station_info
-			destionationStationInfo := map[string]interface{}{}
-			err = json.Unmarshal(body, &destionationStationInfo)
+			destinationStationInfo := map[string]interface{}{}
+			err = json.Unmarshal(body, &destinationStationInfo)
 			if err != nil {
 				log.Println("Error al analizar la respuesta de Google Maps: ", err)
 				return
 			}
 			// Get route_name of the response, body->destination_station_info
-			routeName := destionationStationInfo["route_name"].(string)
+			routeName := destinationStationInfo["route_name"].(string)
 
 			log.Println(routeName)
 
