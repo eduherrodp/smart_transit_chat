@@ -167,6 +167,41 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
 		} else if r.Header.Get("X-Intent") == "Origin Location" {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["OriginLocation"].(string))
+			// Una vez que se obtiene la ubicación de origen, se envía la solicitud al servicio de Google Maps para obtener la ruta entre el origen y el destino
+			// Construir los datos de la solicitud al webhook de Google Maps
+			requestBody := map[string]interface{}{
+				"address":     requestData["OriginLocation"],
+				"destination": requestData["DestinationLocation"],
+			}
+
+			// Convertir los datos de la solicitud a JSON
+			requestData, err := json.Marshal(requestBody)
+			if err != nil {
+				http.Error(w, "Error al analizar los datos", http.StatusBadRequest)
+				return
+			}
+
+			// Crear la solicitud HTTP
+			request, err := http.NewRequest("GET", "http://localhost:3003/google-maps", bytes.NewBuffer(requestData))
+			if err != nil {
+				http.Error(w, "Error al crear la solicitud", http.StatusBadRequest)
+				return
+			}
+
+			// Establecer el header de la solicitud
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("X-Origin", "dialogflow")
+
+			// Crear el cliente HTTP
+			client := &http.Client{}
+
+			// Enviar la solicitud al webhook de Google Maps
+			_, err = client.Do(request)
+			if err != nil {
+				http.Error(w, "Error al enviar la solicitud", http.StatusBadRequest)
+				return
+			}
+
 		} else {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
 		}
