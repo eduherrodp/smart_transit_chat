@@ -10,7 +10,7 @@ function handleWebhook(req, res) {
     const message = body.entry[0].changes[0].value.messages[0].text.body;
     const time = new Date().toLocaleString();
 
-    console.log(time, "|> [Incoming message from whatsapp from]: ", wa_id + ":", name, "|> [Message]: ", message)
+    console.log(time, "|> [Incoming message from]: ", wa_id + ":", name, "|> [Message]: ", message)
 
     const response = { name, wa_id, message };
 
@@ -49,7 +49,7 @@ function medium_webhook(response) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-Origin": toBase64("whatsapp")
+            "X-Origin": "whatsapp"
         },
     };
 

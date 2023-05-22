@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -62,9 +61,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	var strategy ResponseStrategy
 
 	// The service fly in base 64
-	service := base64.StdEncoding.EncodeToString([]byte(r.Header.Get("X-Origin-Service")))
-
-	switch service {
+	switch r.Header.Get("X-Origin-Service") {
 	// the value of the header is on base 64
 	case "whatsapp":
 		strategy = WhatsappStrategy{
