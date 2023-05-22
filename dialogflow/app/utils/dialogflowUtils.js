@@ -28,7 +28,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     const [response] = await client.detectIntent(detectIntentRequest);
     console.log(`Query Text: ${response.queryResult.text}`);
     let location1;
-    if (response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue != null) {
+    if (response.queryResult.match.parameters.fields != null) {
         location1 = response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue
         console.log("location1: ", response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue)
 
@@ -79,14 +79,8 @@ async function mediumWebhook(data, header) {
     // Check if data has the Destination Location field
     const mediumWebhookURL = 'http://localhost:3000/webhook';
 
-    const payload = {
-        'AgentResponse': data.AgentResponse,
-        'SessionID': data.SessionID,
-        'DestinationLocation': data.DestinationLocation,
-    };
-
     try {
-        const response = await axios.post(mediumWebhookURL, payload, {
+        const response = await axios.post(mediumWebhookURL, data, {
             headers: header,
         });
 
