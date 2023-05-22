@@ -91,6 +91,10 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 
     await mediumWebhook(data, header);
 
+    // Reset the location variables
+    location1 = null;
+    location2 = null;
+
     // Just need to return the state code to the client
     return "[dialogflow]: Received\n";
 }

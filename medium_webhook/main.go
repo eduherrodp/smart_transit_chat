@@ -206,8 +206,8 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Obtener el valor de "route_name" si existe
-			if routeName, ok := data["route_name"].(string); ok {
+			// Obtener el valor de "name" si existe
+			if routeName, ok := data["name"].(string); ok {
 				log.Println("Route Name:", routeName)
 			} else {
 				log.Println("No se encontró el campo 'route_name' o no es una cadena")
