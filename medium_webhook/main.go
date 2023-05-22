@@ -149,6 +149,24 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
 	}
+
+	responseData := []byte("Respuesta del servicio")
+
+	// Procesar la respuesta con la estrategia seleccionada
+	result, err := strategy.ProcessResponse(responseData)
+	if err != nil {
+		http.Error(w, "Error al procesar la respuesta", http.StatusInternalServerError)
+		return
+	}
+
+	// Enviar la respuesta al cliente
+	write, err := w.Write([]byte(result))
+	if err != nil {
+		return
+	}
+	if write != len(result) {
+		return
+	}
 }
 
 func main() {
