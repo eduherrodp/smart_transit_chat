@@ -49,13 +49,13 @@ func (s WhatsappStrategy) ProcessResponse([]byte) (string, error) {
 	client := &http.Client{}
 
 	// Enviar la solicitud al webhook de Dialogflow
-	response, err := client.Do(request)
+	_, err = client.Do(request)
 	if err != nil {
 		return "Cannot send request to Dialogflow", err
 	}
 
 	// Do not return the response to the client because it is not necessary
-	return "Request sent to Dialogflow: " + response.Status, nil
+	return "Request sent to Dialogflow:", nil
 }
 
 // DialogflowStrategy Implementación de la estrategia para el servicio de Dialogflow
