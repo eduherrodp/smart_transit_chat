@@ -58,7 +58,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 // mediumWebhook function sends the response to the medium webhook
 async function mediumWebhook(data) {
     // Check if data has the Destination Location field
-    const mediumWebhookURL = 'http://localhost:1024/webhook';
+    const mediumWebhookURL = 'http://localhost:3000/webhook';
 
     const payload = {
         'AgentResponse': data.AgentResponse,
