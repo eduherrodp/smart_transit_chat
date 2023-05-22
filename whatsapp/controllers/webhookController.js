@@ -30,7 +30,7 @@ function verifyWebhook(req, res) {
 }
 
 function medium_webhook(response)  {
-    var statusCode;
+    let statusCode;
     const { name, wa_id, message } = response;
     const data = {
         name,
