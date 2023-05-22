@@ -10,7 +10,7 @@ function handleWebhook(req, res) {
     const message = body.entry[0].changes[0].value.messages[0].text.body;
     const time = new Date().toLocaleString();
 
-    console.log(time, "|> [Incoming message from]: ", wa_id + ":", name, "|> [Message]: ", message)
+    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message)
 
     const response = { name, wa_id, message };
 
