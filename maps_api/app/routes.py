@@ -122,7 +122,7 @@ def get_nearest_station_info(location):
     return nearest_station
 
 
-@app.route("/routes", methods=["GET"])
+@app.route("/google-maps", methods=["GET"])
 def get_routes():
     address = request.args.get("address")
     destination = request.args.get("destination")
