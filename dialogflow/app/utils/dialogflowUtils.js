@@ -4,6 +4,8 @@ const axios = require('axios');
 // Endpoint configuration variables
 
 const client = new SessionsClient({ apiEndpoint: 'us-central1-dialogflow.googleapis.com' });
+let location1;
+let location2;
 
 async function detectIntentText(projectId, location, agentId, sessionId, query, languageCode) {
     const sessionPath = client.projectLocationAgentSessionPath(
@@ -27,15 +29,17 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
 
     const [response] = await client.detectIntent(detectIntentRequest);
     console.log(`Query Text: ${response.queryResult.text}`);
-    let location1;
-    let location2;
-    if (response.queryResult.match.parameters != null && location1 == null) {
-        location1 = response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue
-        console.log("location1: ", response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue)
-    } else if (response.queryResult.match.parameters != null && location1 != null) {
-        location2 = response.queryResult.match.parameters.fields.location2.structValue.fields.original.stringValue
-        console.log("location2: ", response.queryResult.match.parameters.fields.location2.structValue.fields.original.stringValue)
+
+    if (response.queryResult.match.parameters != null) {
+        if (location1 == null) {
+            location1 = response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue;
+            console.log("location1: ", location1);
+        } else {
+            location2 = response.queryResult.match.parameters.fields.location2.structValue.fields.original.stringValue;
+            console.log("location2: ", location2);
+        }
     }
+
     let agentResponse;
     for (const message of response.queryResult.responseMessages) {
         if (message.text) {
@@ -48,6 +52,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
     // Prepare the data to be sent to the medium webhook
     let data;
     let header;
+
     if (location1 != null) {
         data = {
             'AgentResponse': agentResponse,
@@ -58,8 +63,9 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             'Content-Type': 'application/json',
             'X-Origin': 'dialogflow',
             'X-Intent': 'Destination Location',
-        }
+        };
     }
+
     if (location2 != null) {
         data = {
             'AgentResponse': agentResponse,
@@ -70,7 +76,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             'Content-Type': 'application/json',
             'X-Origin': 'dialogflow',
             'X-Intent': 'Origin Location',
-        }
+        };
     } else if (location1 == null && location2 == null) {
         data = {
             'AgentResponse': agentResponse,
@@ -80,7 +86,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
             'Content-Type': 'application/json',
             'X-Origin': 'dialogflow',
             'X-Intent': 'Default Welcome Intent',
-        }
+        };
     }
 
     await mediumWebhook(data, header);
