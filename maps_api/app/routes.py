@@ -147,7 +147,8 @@ def get_routes():
     # Verificar si la ruta de origen y destino son iguales
     if nearest_station_info["route_name"] == destination_station_info["route_name"]:
         response = {
-            "destination_station_info": destination_station_info
+            "destination_station_info": destination_station_info,
+            "origin_station_info": nearest_station_info
         }
     else:
         response = {

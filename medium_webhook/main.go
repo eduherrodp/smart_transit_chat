@@ -206,14 +206,12 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Obtener el valor de "name" si existe
-			if routeName, ok := data["name"].(string); ok {
-				log.Println("Route Name:", routeName)
-			} else {
-				log.Println("No se encontró el campo 'route_name' o no es una cadena")
-				// Show all
-				log.Println(data)
-			}
+			destinationStationInfo := data["destination_station"].(map[string]interface{})
+			name := destinationStationInfo["name"].(string)
+			routeName := destinationStationInfo["route_name"].(string)
+
+			log.Println("name: " + name)
+			log.Println("route_name: " + routeName)
 
 		} else {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
