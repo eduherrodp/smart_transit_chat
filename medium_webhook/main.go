@@ -147,29 +147,26 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Determinar la estrategia basada en el header de la petición X-Origin-Service
-	var _ ResponseStrategy
+	var responseStrategy ResponseStrategy
 
 	// The service fly in base 64
 	switch r.Header.Get("X-Origin") {
 	// the value of the header is on base 64
 	case "whatsapp":
-		_ = WhatsappStrategy{
+		responseStrategy = WhatsappStrategy{
 			Data: requestData,
 		}
 		// Print the request data
 		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["message"].(string) + " | " + requestData["wa_id"].(string) + " | " + requestData["name"].(string))
 	case "dialogflow":
-		_ = DialogflowStrategy{
+		responseStrategy = DialogflowStrategy{
 			Data: requestData,
 		}
 		// Print the request data
 		if r.Header.Get("X-Intent") == "Destination Location" {
-			location1 := requestData["DestinationLocation"].(string)
-			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + location1)
-		}
-		if r.Header.Get("X-Intent") == "Origin Location" {
-			location2 := requestData["OriginLocation"].(string)
-			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + location2)
+			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
+		} else if r.Header.Get("X-Intent") == "Origin Location" {
+			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["OriginLocation"].(string))
 		} else {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
 		}
@@ -177,6 +174,17 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
 	}
+
+	// Procesar la respuesta
+	response, err := responseStrategy.ProcessResponse(body)
+	if err != nil {
+		http.Error(w, "Error al procesar la respuesta", http.StatusInternalServerError)
+		return
+	}
+
+	// Enviar la respuesta
+	w.Header().Set("Content-Type", "application/json")
+	log.Println("[" + r.Header.Get("X-Origin") + "]: " + response)
 
 }
 
