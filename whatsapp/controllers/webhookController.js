@@ -13,7 +13,8 @@ function handleWebhook(req, res) {
 
     res.status(200).send("EVENT_RECEIVED");
 
-    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message + medium_webhook(response))
+    medium_webhook(response);
+    console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message)
 }
 
 function verifyWebhook(req, res) {
@@ -29,8 +30,7 @@ function verifyWebhook(req, res) {
     }
 }
 
-function medium_webhook(response)  {
-    let statusCode;
+function medium_webhook(response) {
     const { name, wa_id, message } = response;
     const data = {
         name,
@@ -52,7 +52,6 @@ function medium_webhook(response)  {
     };
 
     const req = http.request(options, (res) => {
-        statusCode = res.statusCode;
         res.on("data", (d) => {
             process.stdout.write(d);
         });
@@ -64,8 +63,6 @@ function medium_webhook(response)  {
 
     req.write(JSON.stringify(data));
     req.end();
-
-    return " |> [webhook]: " + statusCode;
 }
 
 module.exports = {
