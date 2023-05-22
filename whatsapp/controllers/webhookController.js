@@ -18,10 +18,9 @@ function handleWebhook(req, res) {
 
         res.status(200).send("EVENT_RECEIVED");
 
-        mediumWebhook(response).then(r => console.log(r));
+        mediumWebhook(response).then(r => null);
         console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message);
     } else {
-        console.log("Invalid webhook data");
         res.sendStatus(400);
     }
 }
