@@ -70,7 +70,7 @@ async function sendMessage(req, res) {
 
     const options = {
         hostname: "graph.facebook.com",
-        path: `/v16.0/${wa_id}/messages`,
+        path: `/v16.0/101271482969769/messages`,
         method: "POST",
         headers: {
             "Content-Type": "application/json",
