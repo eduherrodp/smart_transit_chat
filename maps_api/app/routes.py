@@ -127,6 +127,10 @@ def get_routes():
     address = request.args.get("address")
     destination = request.args.get("destination")
 
+    # Mostrar los datos de la dirección y el destino que se reciben
+    print(f"Address: {address}")
+    print(f"Destination: {destination}")
+
     origin_location = geocode(address)
     destination_location = geocode(destination)
 
