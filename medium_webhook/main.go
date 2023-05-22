@@ -122,7 +122,11 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			Data: requestData,
 		}
 		// Print the request data
-		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
+		if r.Header.Get("X-Intent") == "Destination Location" {
+			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
+		} else {
+			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string))
+		}
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
