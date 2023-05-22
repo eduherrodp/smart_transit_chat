@@ -12,4 +12,3 @@ app.listen(PORT || 3001, () => {
 });
 
 app.use("/webhook", webhookRoutes);
-app.use("/message", webhookRoutes);

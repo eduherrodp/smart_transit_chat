@@ -65,7 +65,7 @@ function mediumWebhook(res) {
 }
 
 // Send message to whatsapp to the user with the data provided by the medium webhook
-function sendMessage(res) {
+function sendMessage(req, res) {
     // The request to send the message to whatsapp has the next structure
     // curl -i -X POST \
     // https://graph.facebook.com/v16.0/105954558954427/messages \
@@ -73,41 +73,38 @@ function sendMessage(res) {
     // -H 'Content-Type: application/json' \
     // -d '{ "messaging_product": "whatsapp", "to": "15555555555", "type": "template", "template": { "name": "hello_world", "language": { "code": "en_US" } } }'
 
-    const { wa_id, message } = res;
+    const { body } = req;
+    const { wa_id, message } = body;
     const data = {
         messaging_product: "whatsapp",
-        recipient_type: "individual",
         to: wa_id,
         type: "text",
         text: {
-            "preview_url": false,
-            "text": message
-        }
+            preview_url: false,
+            body: message,
+        },
     }
 
     const options = {
-        hostname: "https://graph.facebook.com/v16.0/"+ wa_id +"/messages",
+        hostname: "graph.facebook.com/v16.0/"+wa_id/+"messages",
         method: "POST",
         headers: {
-            "Authorization": "Bearer EAAx1iTx7xK4BAA2nFwEfzHe6XYMGMBaOFDWnPpQhrjwi9zDn1ZBJkLJ97ocqDhYisYmYgoZCT6Yv2JyQjLfOxxdr3JZA4RZCxfDqafYhouL2FJxmRZAxCm8taEvzWTrSF0NL2PAqgydYY7orBsQLaumdG1bI3ZBPOzLH7czy3B8uDHP9wCxS9WJaP554XxRBCYG7rA4KYfJxpuSCylLztoFdn8JFLPwUgZD",
             "Content-Type": "application/json",
+            "Authorization": "Bearer EAAx1iTx7xK4BAPZBMrDoURgceb1Yb0MZBb4egtVeDgMXC8Y2jXTXqARfpIgAR48SQh8hLhZAecZBmZBd0WTmjxIxHoiJGWiOPqnoP39FloTayKRNK4PrIwZBnt4chG20fQSZBCJfduw8V4ZCUDKoThbi0LABpShJ94q4QOpqbpj7LddHUve4mY6gcpWZBMuyLBbXiawE0UalIQXxNZBRYrsVfNgmx6rsY5PmUZD"
         },
-        body: JSON.stringify(data),
+        data: JSON.stringify(data),
     }
 
     const req = http.request(options, (res) => {
         res.on("data", (d) => {
             process.stdout.write(d);
         });
-
-        res.on("error", (error) => {
-            console.error(error);
-
-        });
     });
 
-    console.log("Message sent to whatsapp", data);
-    console.log("req created", req);
+    req.on("error", (error) => {
+        console.error(error);
+    });
+
     req.write(JSON.stringify(data));
     req.end();
 }
