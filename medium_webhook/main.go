@@ -176,15 +176,10 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Procesar la respuesta
-	response, err := responseStrategy.ProcessResponse(body)
+	_, err = responseStrategy.ProcessResponse(body)
 	if err != nil {
-		http.Error(w, "Error al procesar la respuesta", http.StatusInternalServerError)
 		return
 	}
-
-	// Enviar la respuesta
-	w.Header().Set("Content-Type", "application/json")
-	log.Println("[" + r.Header.Get("X-Origin") + "]: " + response)
 
 }
 
