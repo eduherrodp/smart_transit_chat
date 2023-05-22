@@ -122,7 +122,7 @@ def get_nearest_station_info(location):
     return nearest_station
 
 
-@app.route("/google-maps", methods=["GET"])
+@app.route("/routes", methods=["GET"])
 def get_routes():
     address = request.args.get("address")
     destination = request.args.get("destination")
@@ -147,10 +147,16 @@ def get_routes():
     # Verificar si la ruta de origen y destino son iguales
     if nearest_station_info["route_name"] == destination_station_info["route_name"]:
         response = {
+            "start_address": route["routes"][0]["legs"][0]["start_address"],
+            "end_address": route["routes"][0]["legs"][0]["end_address"],
+            "nearest_station_info": nearest_station_info,
             "destination_station_info": destination_station_info
         }
     else:
         response = {
+            "start_address": route["routes"][0]["legs"][0]["start_address"],
+            "end_address": route["routes"][0]["legs"][0]["end_address"],
+            "nearest_station_info": nearest_station_info,
             "destination_station_info": {
                 "distance": None,
                 "name": "No hay una parada cercana en la misma ruta",
