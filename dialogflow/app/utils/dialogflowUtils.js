@@ -51,7 +51,7 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
         }
     } else {
         data = {
-            'AgentResponse': response.queryResult.text,
+            'AgentResponse': agentResponse,
             'SessionID': sessionId,
         };
         header = {
