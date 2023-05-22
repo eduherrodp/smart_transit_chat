@@ -78,6 +78,10 @@ async function sendMessage(req, res) {
         },
     };
 
+    // Show the request data in the terminal
+    console.log("Request data: ", data);
+    
+
     const httpRequest = http.request(options, (response) => {
         response.on("data", (d) => {
             process.stdout.write(d);
