@@ -121,6 +121,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		strategy = DialogflowStrategy{
 			Data: requestData,
 		}
+		log.Println(r.Header.Get("X-Intent"))
 		// Print the request data
 		if r.Header.Get("X-Intent") == "Destination Location" {
 			log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["AgentResponse"].(string) + " | " + requestData["SessionID"].(string) + " | " + requestData["DestinationLocation"].(string))
