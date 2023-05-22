@@ -49,13 +49,25 @@ func (s WhatsappStrategy) ProcessResponse([]byte) (string, error) {
 	client := &http.Client{}
 
 	// Enviar la solicitud al webhook de Dialogflow
-	_, err = client.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		return "Cannot send request to Dialogflow", err
 	}
 
-	// Do not return the response to the client because it is not necessary
-	return "Request sent to Dialogflow:", nil
+	// Leer el cuerpo de la respuesta
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "Cannot read response from Dialogflow", err
+	}
+
+	// Decodificar el cuerpo de la respuesta en una estructura
+	var responseData map[string]interface{}
+	err = json.Unmarshal(body, &responseData)
+	if err != nil {
+		return "Cannot parse response from Dialogflow", err
+	}
+
+	return responseData["queryResult"].(map[string]interface{})["fulfillmentText"].(string), nil
 }
 
 // DialogflowStrategy Implementación de la estrategia para el servicio de Dialogflow

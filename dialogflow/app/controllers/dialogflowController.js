@@ -5,8 +5,8 @@ async function detectIntent(req, res) {
     // Dialogflow require the endpoint us-central1-dialogflow.googleapis.com
     const intentResponse = await dialogflowUtils.detectIntentText(projectId, 'us-central1','5ec2d85a-2586-4594-a230-19928f05b854',sessionId, query, languageCode);
 
-    // Return the intent response to the client as JSON code 200
-    res.status(200).json(intentResponse);
+    // Return the response
+    res.json(intentResponse);
 }
 
 module.exports = {

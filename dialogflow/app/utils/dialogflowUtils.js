@@ -37,7 +37,31 @@ async function detectIntentText(projectId, location, agentId, sessionId, query, 
         }
     }
 
-    return response;
+    // We need to return the following:
+    // Agent Response: response.queryResult.text
+    // Session ID: sessionId
+
+    // If the display name intent is "Destination Location" then
+    // we need to return the following:
+    // Destination Location: queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue
+
+    // Construct the response
+
+    let data;
+    if (response.queryResult.match.intent.displayName === 'Destination Location') {
+        data = {
+            'Agent Response': response.queryResult.text,
+            'Session ID': sessionId,
+            'Destination Location': response.queryResult.match.parameters.fields.location1.structValue.fields.original.stringValue,
+        };
+    } else {
+        data = {
+            'Agent Response': response.queryResult.text,
+            'Session ID': sessionId,
+        };
+    }
+
+    return data;
 }
 
 module.exports = {
