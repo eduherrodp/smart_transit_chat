@@ -73,12 +73,12 @@ async function sendMessage(req, res) {
     };
 
     const options = {
-        hostname: "graph.facebook.com",
+        hostname: "https://graph.facebook.com",
         path: `/v16.0/101271482969769/messages`,
         method: "POST",
         headers: {
+            "Authorization": "Bearer EAAx1iTx7xK4BALmtXqbsSQQZBHVKgcpmedk9llfbIhO2XNcytFs28fTbkjtNy7gRChGTJrJr0IxdpQ8J83AQY4URrAVFzHQBloZAIYX3rmZCicZBz9aUpQdA1lqMUjRDeCKtCpIufn4OqrZCEXZAs4bSMZAx5YVBOBUvLBgY4WzfAuaKKfd1NjkcaAa4wa3dgO96ejKkVkSlnrsleNUZC2EgUcr0PNSZAyRkZD",
             "Content-Type": "application/json",
-            "Authorization": "Bearer EAAx1iTx7xK4BALmtXqbsSQQZBHVKgcpmedk9llfbIhO2XNcytFs28fTbkjtNy7gRChGTJrJr0IxdpQ8J83AQY4URrAVFzHQBloZAIYX3rmZCicZBz9aUpQdA1lqMUjRDeCKtCpIufn4OqrZCEXZAs4bSMZAx5YVBOBUvLBgY4WzfAuaKKfd1NjkcaAa4wa3dgO96ejKkVkSlnrsleNUZC2EgUcr0PNSZAyRkZD"
         },
     };
 
