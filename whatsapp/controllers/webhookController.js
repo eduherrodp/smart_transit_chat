@@ -16,7 +16,7 @@ function handleWebhook(req, res) {
 
         const response = { name, wa_id, message };
 
-        res.status(200).send("EVENT_RECEIVED");
+        res.sendStatus(200);
 
         mediumWebhook(response).then(r => null);
         console.log(time, "|> [Incoming message]: ", wa_id + ":", name, "|> [Message]: ", message);
