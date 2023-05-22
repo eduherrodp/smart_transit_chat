@@ -68,7 +68,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			Data: requestData,
 		}
 		// Print the request data
-		log.Printf("Request data: %v", requestData)
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["message"].(string) + " | " + requestData["wa_id"].(string) + " | " + requestData["name"].(string))
 	case "dialogflow":
 		strategy = DialogflowStrategy{
 			Data: requestData,
