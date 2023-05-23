@@ -174,6 +174,8 @@ def mediumWebhook(data):
        "Content-Type": "application/json",
        "X-Origin": "google-maps"
    }
+    # Data
+    data = json.dumps(data)
    # Send the request
    response = requests.post(url, data=data)
    print(response.text)
