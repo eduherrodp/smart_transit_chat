@@ -261,7 +261,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		responseStrategy = GoogleMapsStrategy{
 			Data: requestData,
 		}
-		log.Print("[" + r.Header.Get("X-Origin") + "]: " + requestData["start_address"].(string) + " | " + requestData["end_address"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["distance"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["distance"].(string))
+		log.Print("[" + r.Header.Get("X-Origin") + "]: ") // + requestData["start_address"].(string) + " | " + requestData["end_address"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["distance"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["distance"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
