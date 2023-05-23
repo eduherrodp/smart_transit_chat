@@ -163,7 +163,7 @@ def get_routes():
                 "route_name": None
             }
         }
-    mediumWebhook(data)
+    mediumWebhook(response)
     return jsonify(response)
 
 # Send the data to the medium webhook
@@ -176,4 +176,3 @@ def mediumWebhook(data):
     }
     # Send the request
     response = requests.post(url, data=data)
-    
