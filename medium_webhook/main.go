@@ -261,27 +261,6 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		responseStrategy = GoogleMapsStrategy{
 			Data: requestData,
 		}
-		// The response is in the format:
-		// Response has the following structure:
-		//{
-		//	"destination_station_info": {
-		//	"distance": 166,
-		//			"name": "blvd norte y 26 pte",
-		//			"route_name": "cu - capu.csv"
-		//},
-		//	"end_address": "Blvrd Nte 2210, Las Hadas Mundial 86, 72070 Puebla, Pue., Mexico",
-		//		"nearest_station_info": {
-		//	"distance": 677,
-		//			"name": "31 pte y 19 sur",
-		//			"route_name": "cu - capu.csv"
-		//},
-		//	"start_address": "Av. 31 Pte. 1304, Los Volcanes, 72410 Puebla, Pue., Mexico"
-		//}
-
-		// We need construct the response for the user that will be send to Whatsapp
-		// The response should be in the format:
-		// "La estación más cercana a tu ubicación es: 31 pte y 19 sur, a 677 metros de distancia. La estación más cercana a tu destino es: blvd norte y 26 pte, a 166 metros de distancia."
-
 		log.Print("[" + r.Header.Get("X-Origin") + "]: " + requestData["start_address"].(string) + " | " + requestData["end_address"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["distance"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["distance"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)

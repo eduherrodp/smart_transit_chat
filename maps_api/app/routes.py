@@ -168,11 +168,12 @@ def get_routes():
 
 # Send the data to the medium webhook
 def mediumWebhook(data):
-    url = "http://localhost:3000/webhook"
-    # Headers
-    headers = {
-        "Content-Type": "application/json",
-        "X-Origin": "google-maps"
-    }
-    # Send the request
-    response = requests.post(url, data=data)
+   url = "http://localhost:3000/webhook"
+   # Headers
+   headers = {
+       "Content-Type": "application/json",
+       "X-Origin": "google-maps"
+   }
+   # Send the request
+   response = requests.post(url, data=data)
+   print(response.text)
