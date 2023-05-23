@@ -35,8 +35,18 @@ func (s GoogleMapsStrategy) ProcessResponse([]byte) (string, error) {
 	//whatsappWebhookURL := "http://localhost:1024/webhook/send-message"
 
 	// Construir los datos de la solicitud al webhook de Whatsapp
-	var message = "La estación más cercana a tu ubicación es: " + s.Data["nearest_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["nearest_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. La estación más cercana a tu destino es: " + s.Data["destination_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["destination_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. (Ruta sugerida: " + s.Data["route"].(string) + ") "
-	log.Println("message: " + message)
+	neartestStation := s.Data["nearest_station_info"].(map[string]interface{})["name"].(string)
+	neartestStationDistance := s.Data["nearest_station_info"].(map[string]interface{})["distance"].(string)
+	destinationStation := s.Data["destination_station_info"].(map[string]interface{})["name"].(string)
+	destinationStationDistance := s.Data["destination_station_info"].(map[string]interface{})["distance"].(string)
+	route := s.Data["route"].(string)
+
+	log.Print(neartestStation)
+	log.Print(neartestStationDistance)
+	log.Print(destinationStation)
+	log.Print(destinationStationDistance)
+	log.Print(route)
+
 	//requestBody := map[string]interface{}{
 	//	"wa_id":   s.Data["SessionID"],
 	//	"message": "La estación más cercana a tu ubicación es: " + s.Data["nearest_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["nearest_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. La estación más cercana a tu destino es: " + s.Data["destination_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["destination_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. (Ruta sugerida: " + s.Data["route"].(string) + ") ",
