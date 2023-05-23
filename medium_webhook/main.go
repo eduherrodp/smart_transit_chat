@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 // ResponseStrategy Define una interfaz común para las estrategias
@@ -35,17 +36,35 @@ func (s GoogleMapsStrategy) ProcessResponse([]byte) (string, error) {
 	//whatsappWebhookURL := "http://localhost:1024/webhook/send-message"
 
 	// Construir los datos de la solicitud al webhook de Whatsapp
-	neartestStation := s.Data["nearest_station_info"].(map[string]interface{})["name"].(string)
-	neartestStationDistance := s.Data["nearest_station_info"].(map[string]interface{})["distance"].(string)
-	destinationStation := s.Data["destination_station_info"].(map[string]interface{})["name"].(string)
-	destinationStationDistance := s.Data["destination_station_info"].(map[string]interface{})["distance"].(string)
+	startAddress := s.Data["start_address"].(string)
+	endAddress := s.Data["end_address"].(string)
+
+	// Destination station info
+	destinationStationInfo := s.Data["destination_station_info"].(map[string]interface{})
+
+	destinationStationName := destinationStationInfo["name"].(string)
+	destinationStationDistance := destinationStationInfo["distance"].(float64)
+	// Convert distance to string
+	destinationStationDistanceString := strconv.FormatFloat(destinationStationDistance, 'f', 0, 64)
+
+	// Route name
 	route := s.Data["route"].(string)
 
-	log.Print(neartestStation)
-	log.Print(neartestStationDistance)
-	log.Print(destinationStation)
-	log.Print(destinationStationDistance)
-	log.Print(route)
+	// Origin station info
+	originStationInfo := s.Data["nearest_station_info"].(map[string]interface{})
+
+	originStationName := originStationInfo["name"].(string)
+	originStationDistance := originStationInfo["distance"].(float64)
+	// Convert distance to string
+	originStationDistanceString := strconv.FormatFloat(originStationDistance, 'f', 0, 64)
+
+	// Build the response
+
+	response := "La estación más cercana a tu ubicación es: " + originStationName + ", a " + originStationDistanceString + " metros de distancia. La estación más cercana a tu destino es: " + destinationStationName + ", a " + destinationStationDistanceString + " metros de distancia. (Ruta sugerida: " + route + ") "
+
+	log.Println("Ubicacion de referencia inicial: " + startAddress)
+	log.Println("Ubicacion de referencia final: " + endAddress)
+	log.Println("Response: " + response)
 
 	//requestBody := map[string]interface{}{
 	//	"wa_id":   s.Data["SessionID"],
