@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"google.golang.org/api/iam/v1"
+	iam "google.golang.org/api/iam/v2beta"
 	"io/ioutil"
 	"path/filepath"
 )

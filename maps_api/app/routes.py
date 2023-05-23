@@ -1,6 +1,6 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
-
+import json
 import requests
 from flask import request, jsonify
 from app import app
@@ -122,7 +122,7 @@ def get_nearest_station_info(location):
     return nearest_station
 
 
-@app.route("/routes", methods=["GET"])
+@app.route("/google-maps", methods=["GET"])
 def get_routes():
     address = request.args.get("address")
     destination = request.args.get("destination")
@@ -163,5 +163,25 @@ def get_routes():
                 "route_name": None
             }
         }
-
+    mediumWebhook(response)
     return jsonify(response)
+
+# Send the data to the medium webhook
+def mediumWebhook(data):
+    # Imprimir los datos para verificar
+    print(data)
+
+    # Realizar una solicitud POST al webhook
+    url = "http://localhost:3000/webhook"  # URL del webhook
+    headers = {
+        "Content-Type": "application/json",
+        "X-Origin": "google-maps"
+    }
+    # Convertir los datos a formato JSON
+    data_json = json.dumps(data)
+
+    # Enviar la solicitud POST
+    response = requests.post(url, data=data_json, headers=headers)
+
+    # Imprimir la respuesta
+    print(response.text)
