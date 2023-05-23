@@ -289,7 +289,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		//	"start_address": "Av. 31 Pte. 1304, Los Volcanes, 72410 Puebla, Pue., Mexico"
 		//}
 
-		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["start_address"].(string) + " | " + requestData["end_address"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["distance"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["distance"].(string))
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["start_address"].(string) + " | " + requestData["end_address"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
