@@ -48,7 +48,7 @@ func (s GoogleMapsStrategy) ProcessResponse([]byte) (string, error) {
 	destinationStationDistanceString := strconv.FormatFloat(destinationStationDistance, 'f', 0, 64)
 
 	// Route name
-	route := s.Data["route"].(string)
+	route := destinationStationInfo["route_name"].(string)
 
 	// Origin station info
 	originStationInfo := s.Data["nearest_station_info"].(map[string]interface{})
