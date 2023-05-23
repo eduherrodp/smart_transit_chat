@@ -34,11 +34,9 @@ func (s GoogleMapsStrategy) ProcessResponse([]byte) (string, error) {
 	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
 	//whatsappWebhookURL := "http://localhost:1024/webhook/send-message"
 
-	// Print the response to the user
-	var startAddress = s.Data["start_address"].(string)
-	log.Println("startAddress: " + startAddress)
-
-	//// Construir los datos de la solicitud al webhook de Whatsapp
+	// Construir los datos de la solicitud al webhook de Whatsapp
+	var message = "La estación más cercana a tu ubicación es: " + s.Data["nearest_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["nearest_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. La estación más cercana a tu destino es: " + s.Data["destination_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["destination_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. (Ruta sugerida: " + s.Data["route"].(string) + ") "
+	log.Println("message: " + message)
 	//requestBody := map[string]interface{}{
 	//	"wa_id":   s.Data["SessionID"],
 	//	"message": "La estación más cercana a tu ubicación es: " + s.Data["nearest_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["nearest_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. La estación más cercana a tu destino es: " + s.Data["destination_station_info"].(map[string]interface{})["name"].(string) + ", a " + s.Data["destination_station_info"].(map[string]interface{})["distance"].(string) + " metros de distancia. (Ruta sugerida: " + s.Data["route"].(string) + ") ",
@@ -265,7 +263,23 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		responseStrategy = GoogleMapsStrategy{
 			Data: requestData,
 		}
-		log.Print("[" + r.Header.Get("X-Origin") + "]: ") // + requestData["start_address"].(string) + " | " + requestData["end_address"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["distance"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["distance"].(string))
+		// Considering the response structure:
+		//{
+		//	"destination_station_info": {
+		//	"distance": 166,
+		//			"name": "blvd norte y 26 pte",
+		//			"route_name": "cu - capu.csv"
+		//},
+		//	"end_address": "Blvrd Nte 2210, Las Hadas Mundial 86, 72070 Puebla, Pue., Mexico",
+		//		"nearest_station_info": {
+		//	"distance": 677,
+		//			"name": "31 pte y 19 sur",
+		//			"route_name": "cu - capu.csv"
+		//},
+		//	"start_address": "Av. 31 Pte. 1304, Los Volcanes, 72410 Puebla, Pue., Mexico"
+		//}
+
+		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["start_address"].(string) + " | " + requestData["end_address"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["destination_station_info"].(map[string]interface{})["distance"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["name"].(string) + " | " + requestData["nearest_station_info"].(map[string]interface{})["distance"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
 		return
