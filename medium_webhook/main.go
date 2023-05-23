@@ -25,6 +25,8 @@ type GoogleMapsStrategy struct {
 	Data map[string]interface{}
 }
 
+var waID string
+
 func (s GoogleMapsStrategy) ProcessResponse([]byte) (string, error) {
 
 	// Enviar la respuesta a Whatsapp o a Google Maps utilizando el webhook
@@ -64,7 +66,7 @@ func (s GoogleMapsStrategy) ProcessResponse([]byte) (string, error) {
 		"¡Gracias por usar nuestro servicio!"
 
 	requestBody := map[string]interface{}{
-		"wa_id":   s.Data["SessionID"],
+		"wa_id":   waID,
 		"message": data,
 	}
 
@@ -98,6 +100,8 @@ func (s GoogleMapsStrategy) ProcessResponse([]byte) (string, error) {
 func (s WhatsappStrategy) ProcessResponse([]byte) (string, error) {
 	// Enviar la respuesta a Dialogflow utilizando el webhook
 	dialogflowWebhookURL := "http://localhost:3002/dialogflow"
+
+	waID = s.Data["wa_id"].(string)
 
 	// Construir los datos de la solicitud al webhook de Dialogflow
 	requestBody := map[string]interface{}{
@@ -266,7 +270,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			defer response.Body.Close()
 
-			// Don't need to read the body, maps_ai API REST will send the response to the endpoint /webhook whit the
+			// Don't need to read the body, maps_ai API REST will send the response to the endpoint /webhook with the
 			// X-Origin header with the value of google-maps
 
 		} else {
@@ -276,22 +280,6 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		responseStrategy = GoogleMapsStrategy{
 			Data: requestData,
 		}
-		// Considering the response structure:
-		//{
-		//	"destination_station_info": {
-		//	"distance": 166,
-		//			"name": "blvd norte y 26 pte",
-		//			"route_name": "cu - capu.csv"
-		//},
-		//	"end_address": "Blvrd Nte 2210, Las Hadas Mundial 86, 72070 Puebla, Pue., Mexico",
-		//		"nearest_station_info": {
-		//	"distance": 677,
-		//			"name": "31 pte y 19 sur",
-		//			"route_name": "cu - capu.csv"
-		//},
-		//	"start_address": "Av. 31 Pte. 1304, Los Volcanes, 72410 Puebla, Pue., Mexico"
-		//}
-
 		log.Println("[" + r.Header.Get("X-Origin") + "]: " + requestData["start_address"].(string) + " | " + requestData["end_address"].(string))
 	default:
 		http.Error(w, "Servicio no soportado", http.StatusBadRequest)
