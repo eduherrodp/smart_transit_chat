@@ -25,3 +25,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Authors
 
 - [Eduardo Hernandez](https://github.com/eduherrodp)
+- [David Navarro](https://github.com/DavidN18) 
